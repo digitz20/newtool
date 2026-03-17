@@ -1127,10 +1127,10 @@ async function main(io) {
       '--disable-dev-shm-usage',
       '--disable-accelerated-2d-canvas',
       '--disable-gpu',
-      '--ignore-certificate-errors',
-      '--ignore-ssl-errors',
-      '--ignore-certificate-errors-spki-list',
-      '--ignore-ssl-errors-ignore-untrusted'
+      // '--ignore-certificate-errors',
+      // '--ignore-ssl-errors',
+      // '--ignore-certificate-errors-spki-list',
+      // '--ignore-ssl-errors-ignore-untrusted'
     ],
   });
 
@@ -1202,10 +1202,10 @@ async function main(io) {
           '--disable-dev-shm-usage',
           '--disable-accelerated-2d-canvas',
           '--disable-gpu',
-          '--ignore-certificate-errors',
-          '--ignore-ssl-errors',
-          '--ignore-certificate-errors-spki-list',
-          '--ignore-ssl-errors-ignore-untrusted'
+          // '--ignore-certificate-errors',
+          // '--ignore-ssl-errors',
+          // '--ignore-certificate-errors-spki-list',
+          // '--ignore-ssl-errors-ignore-untrusted'
         ],
       });
     }
