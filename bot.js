@@ -1081,6 +1081,7 @@ function isValidName(name, title, irrelevantPhrases) {
       });
     }
   }
+  
 
   // Apply "Least Position" Logic to Scraped Data
   if (scrapedPeople.length > 0) {
