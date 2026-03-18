@@ -1062,6 +1062,7 @@ async function main(io) {
 
   let browser = await puppeteer.launch({
     headless: "new",
+    ignoreHTTPSErrors: true, // Add this line
     args: [
       '--no-sandbox',
       '--disable-setuid-sandbox',
@@ -1137,6 +1138,7 @@ async function main(io) {
       console.log('Restarting browser and continuing...');
       browser = await puppeteer.launch({
         headless: "new", // Changed to "new" as per deprecation warning
+        ignoreHTTPSErrors: true, // Add this line
         args: [
           '--no-sandbox',
           '--disable-setuid-sandbox',
