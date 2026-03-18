@@ -681,11 +681,11 @@ async function getWebsitesByIndustry(industry, browser) {
 
     } catch (error) {
       console.error(`Could not scrape for TLD ${tld}: ${error.message}`);
-    } finally {
-      if (page) {
-        await page.close();
-      }
-    }
+    // } finally {
+    //   if (page) {
+    //     await page.close();
+    //   }
+    // }
   }
   return [...allLinks];
 }
@@ -817,11 +817,11 @@ async function extractEmailsFromWebsite(url, browser) {
       // Silently ignore retryable errors on initial URL load
     } else {
       console.error(`An error occurred while extracting emails from ${url}:`, error);
-    }
-  } finally {
-    if (page) {
-      await page.close();
-    }
+    }}
+  // } finally {
+  //   if (page) {
+  //     await page.close();
+  //   }
   }
 
 //   // --- NEW SCRAPING LOGIC FOR PEOPLE DATA GOES HERE ---
