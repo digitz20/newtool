@@ -631,7 +631,6 @@ async function getWebsitesByIndustry(industry, browser) {
   const tldsToSearch = shuffleArray([...CONFIG.searchTlds]).slice(0, 15);
   console.log(`Searching TLDs: ${tldsToSearch.join(', ')}`);
 
-  
   for (const tld of tldsToSearch) {
     let page;
     try {
@@ -641,7 +640,7 @@ async function getWebsitesByIndustry(industry, browser) {
       // Use HTML version of DuckDuckGo and fix site search parameter
       const query = `"${industry}" contact OR about OR "${industry}" site:${tld.substring(1)}`;
       const searchUrl = `https://html.duckduckgo.com/html/?q=${encodeURIComponent(query)}`;
-      await page.goto(searchUrl, { waitUntil: 'domcontentloaded' });
+      await page.goto(searchUrl, { waitUntil: 'domcontentloaded', timeout: 90000 });
 
       // Selector for the HTML version
       const links = await page.$$eval('a.result__a', anchors =>
@@ -677,7 +676,6 @@ async function getWebsitesByIndustry(industry, browser) {
             return false;
         }
       });
-      
 
       filteredLinks.forEach(link => allLinks.add(link));
 
@@ -791,11 +789,6 @@ async function extractEmailsFromWebsite(url, browser) {
           success = true;
           break;
         } catch (err) {
-          if (err.message.includes('Session closed')) {
-            console.error(`CRITICAL ERROR: Protocol error (Page.navigate): Session closed for ${currentUrl}. Skipping this URL.`);
-            break; // Exit retry loop for this URL
-          }
-
           const isRetryableError = err.name === 'TimeoutError' || 
             err.message.includes('net::ERR_CONNECTION_TIMED_OUT') || 
             err.message.includes('net::ERR_NAME_NOT_RESOLVED') || 
@@ -824,10 +817,6 @@ async function extractEmailsFromWebsite(url, browser) {
       // Silently ignore retryable errors on initial URL load
     } else {
       console.error(`An error occurred while extracting emails from ${url}:`, error);
-    }
-  } finally {
-    if (page) {
-      await page.close();
     }
   }
 
@@ -891,7 +880,7 @@ function isValidName(name, title, irrelevantPhrases) {
     
     for (let attempt = 1; attempt <= maxRetries; attempt++) {
       try {
-        await pageInstance.goto(pageUrl, { waitUntil: 'networkidle2', timeout: 90000 });
+        await pageInstance.goto(pageUrl, { waitUntil: 'domcontentloaded', timeout: 30000 });
         const content = await pageInstance.content();
 
         // More aggressive approach: look for common HTML structures and patterns
@@ -1005,10 +994,6 @@ function isValidName(name, title, irrelevantPhrases) {
         });
         return peopleFound; // Success, return the results
       } catch (error) {
-        if (error.message.includes('net::ERR_NAME_NOT_RESOLVED')) {
-          console.error(`[ERROR] Skipping unresolvable domain: ${pageUrl}`);
-          return []; // Skip this URL and return empty array
-        }
         console.error(`Error scraping people from ${pageUrl} (attempt ${attempt}/${maxRetries}):`, error.message);
         if (attempt === maxRetries) {
           return []; // Return empty array after all retries
