@@ -881,6 +881,8 @@ function isValidName(name, title, irrelevantPhrases) {
   async function scrapePeopleFromPage(pageUrl, pageInstance) {
     const peopleFound = [];
     const maxRetries = 3;
+
+  
     
     for (let attempt = 1; attempt <= maxRetries; attempt++) {
       try {
