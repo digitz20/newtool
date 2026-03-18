@@ -640,8 +640,7 @@ async function getWebsitesByIndustry(industry, browser) {
       // Use HTML version of DuckDuckGo and fix site search parameter
       const query = `"${industry}" contact OR about OR "${industry}" site:${tld.substring(1)}`;
       const searchUrl = `https://html.duckduckgo.com/html/?q=${encodeURIComponent(query)}`;
-      await page.goto(searchUrl, { waitUntil: 'domcontentloaded' });
-
+      await page.goto(searchUrl, { waitUntil: 'networkidle2', timeout: 90000 });
 
       // Selector for the HTML version
       const links = await page.$$eval('a.result__a', anchors =>
@@ -682,11 +681,11 @@ async function getWebsitesByIndustry(industry, browser) {
 
     } catch (error) {
       console.error(`Could not scrape for TLD ${tld}: ${error.message}`);
-    // } finally {
-    //   if (page) {
-    //     await page.close();
-    //   }
-    // }
+    } finally {
+      if (page) {
+        await page.close();
+      }
+    }
   }
   return [...allLinks];
 }
@@ -818,11 +817,11 @@ async function extractEmailsFromWebsite(url, browser) {
       // Silently ignore retryable errors on initial URL load
     } else {
       console.error(`An error occurred while extracting emails from ${url}:`, error);
-    }}
-  // } finally {
-  //   if (page) {
-  //     await page.close();
-  //   }
+    }
+  } finally {
+    if (page) {
+      await page.close();
+    }
   }
 
 //   // --- NEW SCRAPING LOGIC FOR PEOPLE DATA GOES HERE ---
@@ -882,8 +881,6 @@ function isValidName(name, title, irrelevantPhrases) {
   async function scrapePeopleFromPage(pageUrl, pageInstance) {
     const peopleFound = [];
     const maxRetries = 3;
-
-  
     
     for (let attempt = 1; attempt <= maxRetries; attempt++) {
       try {
