@@ -884,7 +884,7 @@ function isValidName(name, title, irrelevantPhrases) {
     
     for (let attempt = 1; attempt <= maxRetries; attempt++) {
       try {
-        await pageInstance.goto(pageUrl, { waitUntil: 'networkidle2', timeout: 60000 });
+        await pageInstance.goto(pageUrl, { waitUntil: 'networkidle2', timeout: 90000 });
         const content = await pageInstance.content();
 
         // More aggressive approach: look for common HTML structures and patterns
