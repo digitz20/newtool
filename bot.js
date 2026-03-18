@@ -884,137 +884,146 @@ function isValidName(name, title, irrelevantPhrases) {
 }
   
   // Function to scrape names, titles, and emails from a given page
-  async function scrapePeopleFromPage(pageUrl, pageInstance) {
+  async function scrapePeopleFromPage(pageUrl, browser) {
     const peopleFound = [];
     const maxRetries = 3;
-    
-    for (let attempt = 1; attempt <= maxRetries; attempt++) {
-      try {
-        // Add a random delay before navigating to the page
-        const delay = Math.floor(Math.random() * 3000) + 2000; // Random delay between 2 to 5 seconds
-        await new Promise(resolve => setTimeout(resolve, delay));
-        await pageInstance.goto(pageUrl, { waitUntil: 'domcontentloaded', timeout: 30000 });
-        const content = await pageInstance.content();
+    let pageInstance; // Declare pageInstance here
 
-        // More aggressive approach: look for common HTML structures and patterns
-        const scrapedElements = await pageInstance.$$eval('body p, body div, body span, body li, body td, body h1, body h2, body h3, body h4, body h5, body h6, body a, body strong, body b, body em, body i, body blockquote, body cite, body q, body address, body pre, body code, body samp, body kbd, body var, body dfn, body abbr, body acronym', (elements, irrelevantPhrases) => {
-          const results = [];
-          const emailRegex = /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/;
+    try {
+      pageInstance = await browser.newPage(); // Create a new page for this function call
+      for (let attempt = 1; attempt <= maxRetries; attempt++) {
+        try {
+          // Add a random delay before navigating to the page
+          const delay = Math.floor(Math.random() * 3000) + 2000; // Random delay between 2 to 5 seconds
+          await new Promise(resolve => setTimeout(resolve, delay));
+          await pageInstance.goto(pageUrl, { waitUntil: 'domcontentloaded', timeout: 30000 });
+          const content = await pageInstance.content();
 
-          // Define isValidNameInBrowser locally for the browser context
-          const isValidNameInBrowser = (name, title, irrelevantPhrases) => {
-            if (!name || typeof name !== 'string' || name.trim().length < 2) {
-              return false;
-            }
+          // More aggressive approach: look for common HTML structures and patterns
+          const scrapedElements = await pageInstance.$$eval('body p, body div, body span, body li, body td, body h1, body h2, body h3, body h4, body h5, body h6, body a, body strong, body b, body em, body i, body blockquote, body cite, body q, body address, body pre, body code, body samp, body kbd, body var, body dfn, body abbr, body acronym', (elements, irrelevantPhrases) => {
+            const results = [];
+            const emailRegex = /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/;
 
-            const lowerName = name.toLowerCase();
-            const lowerTitle = title ? title.toLowerCase() : '';
+            // Define isValidNameInBrowser locally for the browser context
+            const isValidNameInBrowser = (name, title, irrelevantPhrases) => {
+              if (!name || typeof name !== 'string' || name.trim().length < 2) {
+                return false;
+              }
 
-            // Check against irrelevant phrases
-            if (irrelevantPhrases.some(phrase => lowerName.includes(phrase.toLowerCase()) || lowerTitle.includes(phrase.toLowerCase()))) {
-              return false;
-            }
+              const lowerName = name.toLowerCase();
+              const lowerTitle = title ? title.toLowerCase() : '';
 
-            // Check for presence of numbers or too many special characters in the name
-            if (/\d/.test(name) || (name.match(/[^a-zA-Z\s'-]/g) || []).length > 2) {
-              return false;
-            }
+              // Check against irrelevant phrases
+              if (irrelevantPhrases.some(phrase => lowerName.includes(phrase.toLowerCase()) || lowerTitle.includes(phrase.toLowerCase()))) {
+                return false;
+              }
 
-            // A name should typically have at least two words (first and last name) or be a single, longer word.
-            const words = name.split(/\s+/).filter(Boolean);
-            if (words.length === 1 && words[0].length < 3) { // e.g., "Dr." or "Mr." alone
-              return false;
-            }
+              // Check for presence of numbers or too many special characters in the name
+              if (/\d/.test(name) || (name.match(/[^a-zA-Z\s'-]/g) || []).length > 2) {
+                return false;
+              }
 
-            return true;
-          };
+              // A name should typically have at least two words (first and last name) or be a single, longer word.
+              const words = name.split(/\s+/).filter(Boolean);
+              if (words.length === 1 && words[0].length < 3) { // e.g., "Dr." or "Mr." alone
+                return false;
+              }
 
-          elements.forEach(el => {
-            if (el.innerText && el.innerText.length > 5 && el.innerText.length < 500) {
-              const text = el.innerText.trim();
-              const lines = text.split('\n').map(line => line.trim()).filter(line => line.length > 0);
+              return true;
+            };
 
-              let name = '';
-              let title = '';
-              let email = '';
+            elements.forEach(el => {
+              if (el.innerText && el.innerText.length > 5 && el.innerText.length < 500) {
+                const text = el.innerText.trim();
+                const lines = text.split('\n').map(line => line.trim()).filter(line => line.length > 0);
 
-              // Find email in the text
-              const emailMatch = text.match(emailRegex);
-              if (emailMatch) {
-                email = emailMatch[0];
+                let name = '';
+                let title = '';
+                let email = '';
 
-                // Try different patterns to extract name and title
-                if (lines.length >= 2) {
-                  // Multi-line: assume first is name, second is title
-                  if (lines[0] && !emailRegex.test(lines[0])) name = lines[0];
-                  if (lines[1] && !emailRegex.test(lines[1])) title = lines[1];
-                } else if (lines.length === 1) {
-                  // Single line: extract name from the line excluding email
-                  name = lines[0].replace(emailRegex, '').replace(/[<>\(\)\-]/g, '').trim();
-                }
+                // Find email in the text
+                const emailMatch = text.match(emailRegex);
+                if (emailMatch) {
+                  email = emailMatch[0];
 
-                // Clean up name and title
-                if (name && !/^[a-zA-Z\s.'-]+$/.test(name)) name = '';
-                if (title && !/^[a-zA-Z\s.'-]+$/.test(title)) title = '';
-
-                // Additional patterns for name-email combinations
-                const patterns = [
-                  /([A-Za-z\s]+)\s*<[^>]*>/g, // Name <...>
-                  /\([^)]+\)\s*([A-Za-z\s]+)/g, // (...) Name
-                  /([A-Za-z\s]+)\s*-\s*[^@]+@/g, // Name - ...@
-                ];
-                patterns.forEach(pattern => {
-                  const match = text.match(pattern);
-                  if (match) {
-                    const extracted = match[0].replace(emailRegex, '').replace(/[<>\(\)\-]/g, '').trim();
-                    if (extracted && !name) name = extracted;
+                  // Try different patterns to extract name and title
+                  if (lines.length >= 2) {
+                    // Multi-line: assume first is name, second is title
+                    if (lines[0] && !emailRegex.test(lines[0])) name = lines[0];
+                    if (lines[1] && !emailRegex.test(lines[1])) title = lines[1];
+                  } else if (lines.length === 1) {
+                    // Single line: extract name from the line excluding email
+                    name = lines[0].replace(emailRegex, '').replace(/[<>\(\)\-]/g, '').trim();
                   }
-                });
 
-                // Validate and add
-                if (isValidNameInBrowser(name, title, irrelevantPhrases)) {
-                  results.push({ name, title, email });
+                  // Clean up name and title
+                  if (name && !/^[a-zA-Z\s.'-]+$/.test(name)) name = '';
+                  if (title && !/^[a-zA-Z\s.'-]+$/.test(title)) title = '';
+
+                  // Additional patterns for name-email combinations
+                  const patterns = [
+                    /([A-Za-z\s]+)\s*<[^>]*>/g, // Name <...>
+                    /\([^)]+\)\s*([A-Za-z\s]+)/g, // (...) Name
+                    /([A-Za-z\s]+)\s*-\s*[^@]+@/g, // Name - ...@
+                  ];
+                  patterns.forEach(pattern => {
+                    const match = text.match(pattern);
+                    if (match) {
+                      const extracted = match[0].replace(emailRegex, '').replace(/[<>\(\)\-]/g, '').trim();
+                      if (extracted && !name) name = extracted;
+                    }
+                  });
+
+                  // Validate and add
+                  if (isValidNameInBrowser(name, title, irrelevantPhrases)) {
+                    results.push({ name, title, email });
+                  }
                 }
               }
-            }
-          });
+            });
 
-          // Additional global search for specific patterns across the page
-          const bodyText = document.body.innerText;
-          const globalPatterns = [
-            /([A-Za-z\s]+)\s*<([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})>/g, // Name <email>
-            /([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})\s*\(([^)]+)\)/g, // email (name)
-            /([A-Za-z\s]+)\s*-\s*([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})/g, // Name - email
-          ];
-          globalPatterns.forEach(pattern => {
-            let match;
-            while ((match = pattern.exec(bodyText)) !== null) {
-              const name = match[1] || match[2];
-              const email = match[2] || match[1];
-              if (name && email && isValidNameInBrowser(name, '', irrelevantPhrases)) {
-                results.push({ name, title: '', email });
+            // Additional global search for specific patterns across the page
+            const bodyText = document.body.innerText;
+            const globalPatterns = [
+              /([A-Za-z\s]+)\s*<([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})>/g, // Name <email>
+              /([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})\s*\(([^)]+)\)/g, // email (name)
+              /([A-Za-z\s]+)\s*-\s*([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})/g, // Name - email
+            ];
+            globalPatterns.forEach(pattern => {
+              let match;
+              while ((match = pattern.exec(bodyText)) !== null) {
+                const name = match[1] || match[2];
+                const email = match[2] || match[1];
+                if (name && email && isValidNameInBrowser(name, '', irrelevantPhrases)) {
+                  results.push({ name, title: '', email });
+                }
               }
+            });
+
+            return results;
+          }, CONFIG.irrelevantNamePhrases);
+
+          scrapedElements.forEach(person => {
+            if (person.name && person.email) {
+              peopleFound.push(person);
             }
           });
-
-          return results;
-        }, CONFIG.irrelevantNamePhrases);
-
-        scrapedElements.forEach(person => {
-          if (person.name && person.email) {
-            peopleFound.push(person);
+          return peopleFound; // Success, return the results
+        } catch (error) {
+          console.error(`Error scraping people from ${pageUrl} (attempt ${attempt}/${maxRetries}):`, error.message);
+          if (attempt === maxRetries) {
+            return []; // Return empty array after all retries
           }
-        });
-        return peopleFound; // Success, return the results
-      } catch (error) {
-        console.error(`Error scraping people from ${pageUrl} (attempt ${attempt}/${maxRetries}):`, error.message);
-        if (attempt === maxRetries) {
-          return []; // Return empty array after all retries
+          // Wait before retrying (exponential backoff)
+          await new Promise(resolve => setTimeout(resolve, Math.pow(2, attempt) * 1000));
         }
-        // Wait before retrying (exponential backoff)
-        await new Promise(resolve => setTimeout(resolve, Math.pow(2, attempt) * 1000));
+      }
+    } finally {
+      if (pageInstance && !pageInstance.isClosed()) {
+        await pageInstance.close(); // Ensure the page is closed
       }
     }
+    return peopleFound; // Return peopleFound outside the try-finally
   }
 
   // Visit potential people pages and scrape
@@ -1025,7 +1034,7 @@ function isValidName(name, title, irrelevantPhrases) {
     }
     if (!visited.has(peoplePageUrl)) { // Avoid re-visiting pages already crawled for general emails
       console.log(`[INFO] Visiting potential people page: ${peoplePageUrl}`);
-      const peopleOnPage = await scrapePeopleFromPage(peoplePageUrl, page);
+      const peopleOnPage = await scrapePeopleFromPage(peoplePageUrl, browser);
       peopleOnPage.forEach(person => {
         if (scrapedPeople.length < CONFIG.maxPeopleToScrape) {
           scrapedPeople.push(person);
