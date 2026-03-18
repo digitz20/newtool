@@ -640,7 +640,7 @@ async function getWebsitesByIndustry(industry, browser) {
       // Use HTML version of DuckDuckGo and fix site search parameter
       const query = `"${industry}" contact OR about OR "${industry}" site:${tld.substring(1)}`;
       const searchUrl = `https://html.duckduckgo.com/html/?q=${encodeURIComponent(query)}`;
-      await page.goto(searchUrl, { waitUntil: 'networkidle2', timeout: 90000 });
+      await page.goto(searchUrl, { waitUntil: 'domcontentloaded' });
 
       // Selector for the HTML version
       const links = await page.$$eval('a.result__a', anchors =>
