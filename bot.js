@@ -631,6 +631,7 @@ async function getWebsitesByIndustry(industry, browser) {
   const tldsToSearch = shuffleArray([...CONFIG.searchTlds]).slice(0, 15);
   console.log(`Searching TLDs: ${tldsToSearch.join(', ')}`);
 
+  
   for (const tld of tldsToSearch) {
     let page;
     try {
@@ -789,6 +790,11 @@ async function extractEmailsFromWebsite(url, browser) {
           success = true;
           break;
         } catch (err) {
+          if (err.message.includes('Session closed')) {
+            console.error(`CRITICAL ERROR: Protocol error (Page.navigate): Session closed for ${currentUrl}. Skipping this URL.`);
+            break; // Exit retry loop for this URL
+          }
+
           const isRetryableError = err.name === 'TimeoutError' || 
             err.message.includes('net::ERR_CONNECTION_TIMED_OUT') || 
             err.message.includes('net::ERR_NAME_NOT_RESOLVED') || 
