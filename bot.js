@@ -677,6 +677,7 @@ async function getWebsitesByIndustry(industry, browser) {
             return false;
         }
       });
+      
 
       filteredLinks.forEach(link => allLinks.add(link));
 
