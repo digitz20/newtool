@@ -640,7 +640,7 @@ async function getWebsitesByIndustry(industry, browser) {
       // Use HTML version of DuckDuckGo and fix site search parameter
       const query = `"${industry}" contact OR about OR "${industry}" site:${tld.substring(1)}`;
       const searchUrl = `https://html.duckduckgo.com/html/?q=${encodeURIComponent(query)}`;
-      await page.goto(searchUrl, { waitUntil: 'domcontentloaded', timeout: 90000 });
+      await page.goto(searchUrl, { waitUntil: 'networkidle2', timeout: 90000 });
 
       // Selector for the HTML version
       const links = await page.$$eval('a.result__a', anchors =>
@@ -818,6 +818,10 @@ async function extractEmailsFromWebsite(url, browser) {
     } else {
       console.error(`An error occurred while extracting emails from ${url}:`, error);
     }
+  } finally {
+    if (page) {
+      await page.close();
+    }
   }
 
 //   // --- NEW SCRAPING LOGIC FOR PEOPLE DATA GOES HERE ---
@@ -880,7 +884,7 @@ function isValidName(name, title, irrelevantPhrases) {
     
     for (let attempt = 1; attempt <= maxRetries; attempt++) {
       try {
-        await pageInstance.goto(pageUrl, { waitUntil: 'domcontentloaded', timeout: 30000 });
+        await pageInstance.goto(pageUrl, { waitUntil: 'networkidle2', timeout: 60000 });
         const content = await pageInstance.content();
 
         // More aggressive approach: look for common HTML structures and patterns
