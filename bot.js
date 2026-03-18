@@ -158,7 +158,6 @@ const CONFIG = {
     'reach', 'impression', 'click', 'conversion', 'goal', 'objective', 'strategy', 'tactic', 'campaign', 'initiative', 'program', 'project',
     'timeline', 'corrections', 'deadline', 'milestone', 'deliverable', 'scope', 'budget', 'resource', 'allocation', 'prioritization', 'backlog', 'roadmap'
   ],
-  
   irrelevantKeywords: [
     'glassdoor', 'linkedin', 'facebook', 'twitter', 'instagram', 'youtube', 'wikipedia',
     'bloomberg', 'forbes', 'fortune', 'inc', 'reuters', 'techcrunch', 'wsj', 'nytimes', 'washingtonpost', 'theguardian', 'bbc', 'cnn', 'cnbc',
@@ -166,6 +165,7 @@ const CONFIG = {
     'crunchbase', 'owler', 'zoominfo', 'apollo.io', 'dnb.com', 'hoovers', 'manta', 'yellowpages', 'yelp', 'thomasnet',
     'alibaba', 'amazon', 'ebay', 'etsy', 'walmart',
   ],
+  
   dataFile: 'leads.json',
 }
 
