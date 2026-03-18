@@ -994,6 +994,10 @@ function isValidName(name, title, irrelevantPhrases) {
         });
         return peopleFound; // Success, return the results
       } catch (error) {
+        if (error.message.includes('net::ERR_NAME_NOT_RESOLVED')) {
+          console.error(`[ERROR] Skipping unresolvable domain: ${pageUrl}`);
+          return []; // Skip this URL and return empty array
+        }
         console.error(`Error scraping people from ${pageUrl} (attempt ${attempt}/${maxRetries}):`, error.message);
         if (attempt === maxRetries) {
           return []; // Return empty array after all retries
