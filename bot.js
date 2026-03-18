@@ -835,11 +835,21 @@ async function extractEmailsFromWebsite(url, browser) {
 
   // If no direct links, try constructing common people page URLs
   if (potentialPeoplePages.size === 0) {
+    const domainParts = initialHost.split('.');
+    // A bare domain typically has 2 parts (e.g., example.com) or 3 parts if it was originally www.example.com and www. was stripped.
+    // If it has more than 2 parts, it likely already includes a subdomain (e.g., hr.utmb.edu).
+    const isBareDomain = domainParts.length <= 2; 
+
     for (const keyword of peoplePageKeywords) {
+      // Always try the initialHost as is
       potentialPeoplePages.add(`https://${initialHost}/${keyword}`);
       potentialPeoplePages.add(`https://${initialHost}/${keyword}/`);
-      potentialPeoplePages.add(`https://www.${initialHost}/${keyword}`);
-      potentialPeoplePages.add(`https://www.${initialHost}/${keyword}/`);
+
+      // Only try prepending 'www.' if it's a bare domain
+      if (isBareDomain) {
+        potentialPeoplePages.add(`https://www.${initialHost}/${keyword}`);
+        potentialPeoplePages.add(`https://www.${initialHost}/${keyword}/`);
+      }
     }
   }
     
@@ -880,6 +890,9 @@ function isValidName(name, title, irrelevantPhrases) {
     
     for (let attempt = 1; attempt <= maxRetries; attempt++) {
       try {
+        // Add a random delay before navigating to the page
+        const delay = Math.floor(Math.random() * 3000) + 2000; // Random delay between 2 to 5 seconds
+        await new Promise(resolve => setTimeout(resolve, delay));
         await pageInstance.goto(pageUrl, { waitUntil: 'domcontentloaded', timeout: 30000 });
         const content = await pageInstance.content();
 
