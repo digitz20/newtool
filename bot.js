@@ -11,6 +11,7 @@ const nodemailer = require('nodemailer');
 
 
 
+
 // Function to load leads from leads.json
 function loadLeads() {
   try {
@@ -71,9 +72,9 @@ const CONFIG = {
   ],
   
   googleResultsPerSearch: 20,
-  maxPagesToVisit: 50,
+  maxPagesToVisit: 30,
   maxEmailsPerDomain: 30, // Maximum number of unique emails to collect per domain
-  maxPeopleToScrape: 70, // Maximum number of people (names, titles, emails) to scrape per website
+  maxPeopleToScrape: 30, // Maximum number of people (names, titles, emails) to scrape per website
 
   emailDelay: { min: 30000, max: 60000 }, // 30 to 60 seconds
   emailLinks: [
@@ -869,7 +870,7 @@ async function extractEmailsFromWebsite(url, browser) {
 //   // --- NEW SCRAPING LOGIC FOR PEOPLE DATA GOES HERE ---
   console.log(`[INFO] Starting enhanced scraping for people data on ${initialHost}...`);
 
-  const peoplePageKeywords = ['team', 'about', 'leadership', 'our-people', 'management', 'executives', 'board', 'staff', 'people', 'contact', 'who-we-are', 'our-team', 'meet-the-team', 'leadership-team', 'executive-team', 'management-team', 'our-leadership', 'company', 'organization', 'personnel', 'employees', 'directory', 'roster'];
+  const peoplePageKeywords = ['team', 'about', 'leadership', 'our-people', 'management', 'executives', 'board', 'staff', 'people', 'contact', 'who-we-are', 'our-team', 'meet-the-team', 'leadership-team', 'our-leadership', 'company', 'organization', 'personnel', 'employees'];
   const potentialPeoplePages = new Set();
 
   // First, try to find direct links to people pages from the initial crawl
@@ -1069,7 +1070,7 @@ try {
             });
 
             return results;
-          }, CONFIG.irrelevantNamePhrases);
+          }, CONFIG.irrelevantPhrases);
 
           scrapedElements.forEach(person => {
             if (person.name && person.email) {
