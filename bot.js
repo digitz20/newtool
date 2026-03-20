@@ -72,9 +72,9 @@ const CONFIG = {
   ],
   
   googleResultsPerSearch: 20,
-  maxPagesToVisit: 30,
-  maxEmailsPerDomain: 30, // Maximum number of unique emails to collect per domain
-  maxPeopleToScrape: 30, // Maximum number of people (names, titles, emails) to scrape per website
+  maxPagesToVisit: 10,
+  maxEmailsPerDomain: 10, // Maximum number of unique emails to collect per domain
+  maxPeopleToScrape: 10, // Maximum number of people (names, titles, emails) to scrape per website
 
   emailDelay: { min: 30000, max: 60000 }, // 30 to 60 seconds
   emailLinks: [
@@ -158,28 +158,22 @@ irrelevantPhrases: [
 'rating','complaint','resolution','satisfaction','loyalty','engagement',
 'reach','impression','click','goal','objective','strategy','tactic','campaign','initiative','program',
 'timeline','deadline','deliverable','scope','budget','resource','allocation','roadmap',
-
-// 🔥 NEW ADDITIONS (high-value noise)
 'get listed','list your business','add business','add listing','submit business','claim listing','claim your business',
 'remove listing','remove company','edit listing','featured listing','premium listing','top listings',
 'browse categories','all categories','view category','popular searches','top companies','related companies',
 'nearby businesses','similar companies','business listing','company listing','directory listing',
-
 'read more','learn more','see more','view more','click here','tap here','load more','show more',
 'back to top','next page','previous page','open menu','close menu','quick links','useful links',
-
 'log in','sign in','sign up','create account','forgot password','reset password','join now','register now','my account',
-
-'nigeria','lagos','abuja','port harcourt','ibadan','ghana','kenya','africa',
+'nigeria','lagos','abuja','port harcourt','ceo','cto','cfo','cmo','cio','cso','board member','advisory board','executive board','senior','junior','associate'
+,'principal','fellow','intern','apprentice','alumni','faculty','our people','staff list','leadership team','management team','board of directors','executive committee',
+'all rights reserved','terms of use','cookie policy','site map','back to top',
+'next page','previous page','page of','powered by','developed by','designed by','phone number','email address','contact info','ibadan','ghana','kenya','africa',
 'head office','main office','regional office','global office',
-
 'latest articles','recent posts','blog post','news update','featured article','press release','trending topics',
-
 'apply now','contact now','buy now','order now','get started','start now','request quote','get quote',
 'subscribe now','download now','watch video','play video',
-
 'follow us','share this','like us','join community','invite friends','leave a comment','post comment',
-
 'all rights reserved','terms and conditions','privacy notice','cookie policy','legal notice','site map'
 ],
   irrelevantKeywords: [
@@ -912,7 +906,7 @@ function isValidName(name, title, irrelevantPhrases) {
   const normalizedName = name.toLowerCase().trim();
   const normalizedTitle = (title || '').toLowerCase().trim();
 
-  // 🔥 Check irrelevant phrases (case-insensitive)
+  //Check irrelevant phrases (case-insensitive)
   const isIrrelevant = irrelevantPhrases.some(phrase => {
     const p = phrase.toLowerCase();
     return normalizedName.includes(p) || normalizedTitle.includes(p);
@@ -944,8 +938,8 @@ function isValidName(name, title, irrelevantPhrases) {
       for (let attempt = 1; attempt <= maxRetries; attempt++) {
         try {
           // Add a random delay before navigating to the page
-          const delay = Math.floor(Math.random() * 3000) + 2000; // Random delay between 2 to 5 seconds
-          await new Promise(resolve => setTimeout(resolve, delay));
+          // const delay = Math.floor(Math.random() * 3000) + 2000; // Random delay between 2 to 5 seconds
+          // await new Promise(resolve => setTimeout(resolve, delay));
           await pageInstance.setRequestInterception(true);
 
 pageInstance.on('request', (req) => {
@@ -963,13 +957,13 @@ try {
     timeout: 60000
   });
 } catch (err) {
-  console.log(`⚠️ Skipping slow page: ${pageUrl}, continuing anyway...`);
+  console.log(`Skipping slow page: ${pageUrl}, continuing anyway...`);
   return [];
 }
           const content = await pageInstance.content();
 
           // More aggressive approach: look for common HTML structures and patterns
-          const scrapedElements = await pageInstance.$$eval('body p, body div, body span, body li, body td, body h1, body h2, body h3, body h4, body h5, body h6, body a, body strong, body b, body em, body i, body blockquote, body cite, body q, body address, body pre, body code, body samp, body kbd, body var, body dfn, body abbr, body acronym', (elements, irrelevantPhrases) => {
+          const scrapedElements = await pageInstance.$$eval('h1, h2, h3, h4, h5, h6, p, li, span, div[class*="name"], div[class*="person"], div[class*="member"], div[class*="team"], div[class*="contact"], a[href*="mailto:"]', (elements, irrelevantPhrases) => {
             const results = [];
             const emailRegex = /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/;
 
@@ -988,13 +982,24 @@ try {
               }
 
               // Check for presence of numbers or too many special characters in the name
-              if (/\d/.test(name) || (name.match(/[^a-zA-Z\s'-]/g) || []).length > 2) {
+              if (/\d/.test(name) || (name.match(/[^a-zA-Z\s'-]/g) || []).length > 1) { // Changed > 2 to > 1
+                return false;
+              }
+
+              // Exclude names that are all uppercase and short (likely acronyms or company names)
+              const words = name.split(/\s+/).filter(Boolean);
+              if (name === name.toUpperCase() && name.length <= 5 && words.length === 1) {
                 return false;
               }
 
               // A name should typically have at least two words (first and last name) or be a single, longer word.
-              const words = name.split(/\s+/).filter(Boolean);
               if (words.length === 1 && words[0].length < 3) { // e.g., "Dr." or "Mr." alone
+                return false;
+              }
+
+              // Exclude common company indicators
+              const companyIndicators = ['inc', 'ltd', 'corp', 'llc', 'group', 'solutions', 'technologies', 'company', 'co', 'gmbh', 'ag', 'sa', 'bv', 'pte', 'sarl'];
+              if (companyIndicators.some(indicator => lowerName.includes(indicator))) {
                 return false;
               }
 
@@ -1016,18 +1021,61 @@ try {
                   email = emailMatch[0];
 
                   // Try different patterns to extract name and title
-                  if (lines.length >= 2) {
-                    // Multi-line: assume first is name, second is title
-                    if (lines[0] && !emailRegex.test(lines[0])) name = lines[0];
-                    if (lines[1] && !emailRegex.test(lines[1])) title = lines[1];
-                  } else if (lines.length === 1) {
-                    // Single line: extract name from the line excluding email
+                  // Prioritize mailto links
+                  if (el.tagName === 'A' && el.href.startsWith('mailto:')) {
+                    name = el.innerText.replace(emailRegex, '').replace(/[<>\(\)\-]/g, '').trim();
+                    if (!name) {
+                      const mailtoNameMatch = el.href.match(/mailto:([^?]+)/);
+                      if (mailtoNameMatch && mailtoNameMatch[1]) {
+                        name = mailtoNameMatch[1].split('@')[0].replace(/[\._]/g, ' ').trim();
+                      }
+                    }
+                  }
+
+                  if (!name && lines.length >= 2) {
+                    const line1 = lines[0];
+                    const line2 = lines[1];
+
+                    const nameLikeRegex = /^[A-Z][a-zA-Z\s.'-]+$/;
+                    const titleLikeRegex = /^(Manager|Director|Engineer|Specialist|Lead|Head|Officer|VP|President|Founder|CEO|CTO|CFO|CMO|CIO|COO|HR|Sales|Marketing|Software|Data|Product|Project|Business|Senior|Junior|Associate|Analyst|Consultant|Developer|Designer|Architect|Scientist|Research|Operations|Customer|Support|Client|Account|Finance|Legal|Admin|Executive|Assistant|Coordinator|Specialist|Representative|Recruiter|Talent|People|Office|Facilities|Event|Public Relations|Social Media|Content|Writer|Photographer|Videographer|Graphic|Web|Investment|Portfolio|Wealth|Financial|Insurance|Real Estate|Broker|Trader|Underwriter|Claims|Actuary|Co-founder|Chief of Staff|General Manager|Program Manager|Regional Director|Area Director|Country Director|Global Director|Section Head|Group Leader|Team Leader|Supervisor|Foreman|Student|Volunteer)\b/i;
+
+                    if (nameLikeRegex.test(line1) && titleLikeRegex.test(line2)) {
+                      name = line1;
+                      title = line2;
+                    } else if (nameLikeRegex.test(line2) && titleLikeRegex.test(line1)) {
+                      name = line2;
+                      title = line1;
+                    } else if (!emailRegex.test(line1) && line1.length > 3 && line1.split(' ').length <= 4) {
+                      name = line1;
+                      if (!emailRegex.test(line2) && line2.length > 3 && line2.split(' ').length <= 5) {
+                         title = line2;
+                      }
+                    }
+                  }
+
+                  if (!name && lines.length === 1) {
                     name = lines[0].replace(emailRegex, '').replace(/[<>\(\)\-]/g, '').trim();
                   }
 
+                  // Fallback: try to extract name from email if not found yet
+                  if (!name && email) {
+                    const emailUser = email.split('@')[0];
+                    const emailParts = emailUser.split(/[\._-]/); // Split by '.', '_', or '-'
+                    if (emailParts.length >= 2) {
+                      name = emailParts.map(part => part.charAt(0).toUpperCase() + part.slice(1)).join(' ');
+                    } else if (emailParts.length === 1) {
+                      name = emailParts[0].replace(/[\d]/g, '').trim(); // Remove numbers
+                      if (name.length > 1 && name.length < 20) {
+                         name = name.charAt(0).toUpperCase() + name.slice(1);
+                      } else {
+                         name = '';
+                      }
+                    }
+                  }
+
                   // Clean up name and title
-                  if (name && !/^[a-zA-Z\s.'-]+$/.test(name)) name = '';
-                  if (title && !/^[a-zA-Z\s.'-]+$/.test(title)) title = '';
+                  if (name) name = name.replace(/[^a-zA-Z\s.'-]+/g, '').trim();
+                  if (title) title = title.replace(/[^a-zA-Z\s.'-]+/g, '').trim();
 
                   // Additional patterns for name-email combinations
                   const patterns = [
