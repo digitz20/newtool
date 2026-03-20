@@ -103,61 +103,84 @@ const CONFIG = {
     '.uy', '.uz', '.va', '.vc', '.ve', '.vn', '.vu', '.ws', '.ye', '.za',
     '.zm', '.zw'
   ],
-  irrelevantNamePhrases: [
-    'team member', 'general contact', 'find us', 'contact us', 'about us', 'our team', 'read more', 'view all', 'copyright', 'privacy policy', 'terms of service',
-    'member', 'email member', 'send email', 'get in touch', 'reach out', 'inquiry', 'support', 'help', 'admin', 'administrator', 'info', 'sales', 'hr', 'human resources',
-    'customer service', 'technical support', 'billing', 'accounts', 'finance', 'marketing', 'press', 'media', 'news', 'events', 'careers', 'jobs', 'recruiting',
-    'partnerships', 'business development', 'investors', 'board', 'leadership', 'executives', 'management', 'staff', 'personnel', 'directory', 'phone', 'fax',
-    'address', 'location', 'map', 'directions', 'office', 'headquarters', 'branch', 'department', 'division', 'group', 'committee', 'association', 'organization',
-    'noreply', 'no-reply', 'no reply', 'do not reply', 'donotreply', 'postmaster', 'webmaster', 'site admin', 'admin team', 'support team', 'helpdesk', 'tech support',
-    'feedback', 'suggestions', 'web contact', 'client services', 'account manager', 'accounting', 'legal', 'privacy', 'terms', 'press office', 'media relations',
-    'home', 'menu', 'navigation', 'footer', 'header', 'sidebar', 'main', 'content', 'page', 'site', 'website', 'online', 'web', 'portal', 'platform',
-    'login', 'register', 'signup', 'signin', 'logout', 'account', 'profile', 'dashboard', 'settings', 'preferences', 'user', 'guest', 'visitor',
-    'download', 'upload', 'file', 'document', 'image', 'video', 'audio', 'pdf', 'doc', 'xls', 'ppt', 'zip', 'rar', 'exe', 'app', 'software',
-    'search', 'filter', 'sort', 'order', 'buy', 'sell', 'purchase', 'order', 'cart', 'checkout', 'payment', 'shipping', 'delivery', 'tracking',
-    'subscribe', 'newsletter', 'blog', 'forum', 'community', 'social', 'share', 'like', 'comment', 'post', 'thread', 'topic', 'discussion',
-    'faq', 'help center', 'knowledge base', 'tutorial', 'guide', 'manual', 'documentation', 'api', 'developer', 'code', 'script', 'plugin',
-    'cookie', 'analytics', 'tracking', 'gdpr', 'compliance', 'security', 'encryption', 'ssl', 'https', 'domain', 'hosting', 'server',
-    'error', '404', '500', 'maintenance', 'coming soon', 'under construction', 'temporarily unavailable', 'redirect', 'link', 'url',
-    'button', 'form', 'input', 'textarea', 'select', 'checkbox', 'radio', 'submit', 'reset', 'cancel', 'close', 'open', 'toggle', 'expand', 'collapse',
-    'icon', 'logo', 'banner', 'advertisement', 'ad', 'promo', 'offer', 'deal', 'discount', 'coupon', 'voucher', 'gift', 'free', 'trial',
-    'call to action', 'cta', 'landing page', 'homepage', 'index', 'default', 'welcome', 'hello', 'hi', 'greetings', 'thanks', 'thank you',
-    'contact form', 'message', 'subject', 'body', 'attachment', 'captcha', 'verification', 'confirm', 'validate', 'authenticate',
-    'system', 'automatic', 'bot', 'robot', 'crawler', 'spider', 'indexer', 'search engine', 'google', 'bing', 'yahoo', 'duckduckgo',
-    'meta', 'tag', 'keyword', 'description', 'title', 'heading', 'paragraph', 'list', 'table', 'row', 'column', 'cell', 'div', 'span', 'class', 'id',
-    'javascript', 'jquery', 'css', 'html', 'xml', 'json', 'api', 'endpoint', 'request', 'response', 'status', 'code', 'header', 'body',
-    'database', 'query', 'table', 'record', 'field', 'value', 'key', 'index', 'primary', 'foreign', 'constraint', 'trigger', 'procedure',
-    'backup', 'restore', 'sync', 'update', 'upgrade', 'patch', 'version', 'release', 'changelog', 'roadmap', 'milestone', 'sprint',
-    'project', 'task', 'issue', 'bug', 'feature', 'enhancement', 'fix', 'hotfix', 'rollback', 'deploy', 'staging', 'production', 'dev', 'test',
-    'integration', 'continuous', 'deployment', 'delivery', 'pipeline', 'workflow', 'automation', 'ci/cd', 'git', 'github', 'gitlab', 'bitbucket',
-    'branch', 'commit', 'merge', 'pull request', 'push', 'clone', 'fork', 'repository', 'repo', 'source', 'codebase', 'library', 'framework',
-    'dependency', 'package', 'module', 'component', 'widget', 'plugin', 'extension', 'addon', 'theme', 'template', 'layout', 'design',
-    'color', 'font', 'style', 'responsive', 'mobile', 'desktop', 'tablet', 'screen', 'resolution', 'pixel', 'viewport', 'breakpoint',
-    'accessibility', 'a11y', 'wcag', 'aria', 'alt text', 'screen reader', 'keyboard navigation', 'focus', 'tab order', 'skip link',
-    'performance', 'speed', 'optimization', 'cache', 'compression', 'minification', 'lazy loading', 'preload', 'prefetch', 'cdn',
-    'cloud', 'aws', 'azure', 'gcp', 'heroku', 'netlify', 'vercel', 'firebase', 'digitalocean', 'linode', 'vultr', 'scaleway',
-    'docker', 'kubernetes', 'container', 'virtual machine', 'vm', 'serverless', 'lambda', 'function', 'microservice', 'monolith',
-    'agile', 'scrum', 'kanban', 'waterfall', 'methodology', 'process', 'workflow', 'ceremony', 'retrospective', 'standup', 'sprint planning',
-    'product owner', 'scrum master', 'developer', 'tester', 'qa', 'analyst', 'architect', 'engineer', 'specialist', 'consultant',
-    'vendor', 'supplier', 'partner', 'client', 'customer', 'user', 'stakeholder', 'shareholder', 'investor', 'founder', 'ceo', 'cto', 'cfo', 'coo',
-    'manager', 'director', 'vp', 'executive', 'officer', 'chairman', 'president', 'secretary', 'treasurer', 'board member', 'advisor',
-    'recruiter', 'hiring manager', 'talent acquisition', 'hr business partner', 'people operations', 'employee experience', 'workforce',
-    'compensation', 'benefits', 'payroll', 'onboarding', 'offboarding', 'performance review', 'feedback', 'development', 'training',
-    'compliance', 'policy', 'procedure', 'handbook', 'code of conduct', 'ethics', 'diversity', 'inclusion', 'equity', 'culture',
-    'remote work', 'hybrid', 'office', 'workspace', 'coworking', 'meeting room', 'conference', 'webinar', 'seminar', 'workshop',
-    'presentation', 'demo', 'pitch', 'proposal', 'contract', 'agreement', 'nda', 'sla', 'terms and conditions', 'disclaimer', 'liability',
-    'insurance', 'risk', 'assessment', 'audit', 'certification', 'accreditation', 'standard', 'regulation', 'law', 'legal requirement',
-    'intellectual property', 'patent', 'trademark', 'copyright', 'license', 'royalty', 'confidentiality', 'trade secret', 'non-compete',
-    'merger', 'acquisition', 'ipo', 'valuation', 'funding', 'investment', 'venture capital', 'angel investor', 'seed', 'series a', 'series b',
-    'revenue', 'profit', 'loss', 'margin', 'roi', 'kpi', 'metric', 'analytics', 'reporting', 'dashboard', 'data', 'insight', 'trend',
-    'market research', 'survey', 'questionnaire', 'interview', 'focus group', 'usability testing', 'a/b testing', 'multivariate testing',
-    'conversion', 'funnel', 'retention', 'churn', 'cohort', 'segmentation', 'persona', 'journey', 'experience', 'satisfaction', 'nps',
-    'brand', 'identity', 'logo', 'tagline', 'messaging', 'storytelling', 'content', 'copywriting', 'seo', 'sem', 'ppc', 'social media',
-    'influencer', 'ambassador', 'advocate', 'referral', 'affiliate', 'partnership', 'sponsorship', 'endorsement', 'testimonial', 'review',
-    'rating', 'feedback', 'complaint', 'escalation', 'resolution', 'satisfaction', 'loyalty', 'advocacy', 'engagement', 'interaction',
-    'reach', 'impression', 'click', 'conversion', 'goal', 'objective', 'strategy', 'tactic', 'campaign', 'initiative', 'program', 'project',
-    'timeline', 'corrections', 'deadline', 'milestone', 'deliverable', 'scope', 'budget', 'resource', 'allocation', 'prioritization', 'backlog', 'roadmap'
-  ],
+irrelevantPhrases: [
+'team member','general contact','find us','contact us','about us','our team','read more','view all','copyright','privacy policy','terms of service',
+'member','email member','send email','get in touch','reach out','inquiry','support','help','admin','administrator','info','sales','hr','human resources',
+'customer service','technical support','billing','accounts','finance','marketing','press','media','news','events','careers','jobs','recruiting',
+'partnerships','business development','investors','board','leadership','executives','management','staff','personnel','directory','phone','fax',
+'address','location','map','directions','office','headquarters','branch','department','division','group','committee','association','organization',
+'noreply','no-reply','no reply','do not reply','donotreply','postmaster','webmaster','site admin','admin team','support team','helpdesk','tech support',
+'feedback','suggestions','web contact','client services','account manager','accounting','legal','privacy','terms','press office','media relations',
+'home','menu','navigation','footer','header','sidebar','main','content','page','site','website','online','web','portal','platform',
+'login','register','signup','signin','logout','account','profile','dashboard','settings','preferences','user','guest','visitor',
+'download','upload','file','document','image','video','audio','pdf','doc','xls','ppt','zip','rar','exe','app','software',
+'search','filter','sort','order','buy','sell','purchase','cart','checkout','payment','shipping','delivery','tracking',
+'subscribe','newsletter','blog','forum','community','social','share','like','comment','post','thread','topic','discussion',
+'faq','help center','knowledge base','tutorial','guide','manual','documentation','api','developer','code','script','plugin',
+'cookie','analytics','tracking','gdpr','compliance','security','encryption','ssl','https','domain','hosting','server',
+'error','404','500','maintenance','coming soon','under construction','temporarily unavailable','redirect','link','url',
+'button','form','input','textarea','select','checkbox','radio','submit','reset','cancel','close','open','toggle','expand','collapse',
+'icon','logo','banner','advertisement','ad','promo','offer','deal','discount','coupon','voucher','gift','free','trial',
+'call to action','cta','landing page','homepage','index','default','welcome','hello','hi','greetings','thanks','thank you',
+'contact form','message','subject','body','attachment','captcha','verification','confirm','validate','authenticate',
+'system','automatic','bot','robot','crawler','spider','indexer','search engine','google','bing','yahoo','duckduckgo',
+'meta','tag','keyword','description','title','heading','paragraph','list','table','row','column','cell','div','span','class','id',
+'javascript','jquery','css','html','xml','json','endpoint','request','response','status','header','body',
+'database','query','record','field','value','key','index','constraint','trigger','procedure',
+'backup','restore','sync','update','upgrade','patch','version','release','changelog','roadmap','milestone','sprint',
+'project','task','issue','bug','feature','enhancement','fix','deploy','staging','production','dev','test',
+'integration','continuous','deployment','pipeline','workflow','automation','ci cd','git','github','gitlab','repository','repo',
+'branch','commit','merge','pull request','push','clone','fork','source','codebase','library','framework',
+'dependency','package','module','component','widget','plugin','extension','addon','theme','template','layout','design',
+'color','font','style','responsive','mobile','desktop','tablet','screen','resolution','pixel','viewport',
+'accessibility','aria','alt text','screen reader','keyboard navigation',
+'performance','speed','optimization','cache','compression','lazy loading','cdn',
+'cloud','aws','azure','gcp','firebase','digitalocean',
+'docker','kubernetes','container','virtual machine','serverless','lambda','microservice','monolith',
+'agile','scrum','kanban','waterfall','methodology','process','workflow',
+'developer','tester','qa','analyst','architect','engineer','specialist','consultant',
+'vendor','supplier','partner','client','customer','user','stakeholder','shareholder','investor',
+'manager','director','vp','executive','officer','chairman','president','secretary','treasurer','advisor',
+'recruiter','hiring manager','talent acquisition','people operations','employee experience',
+'compensation','benefits','payroll','onboarding','offboarding','performance review','training',
+'compliance','policy','procedure','handbook','ethics','diversity','inclusion','culture',
+'remote work','hybrid','workspace','meeting room','conference','webinar','seminar','workshop',
+'presentation','demo','pitch','proposal','contract','agreement','nda','sla','disclaimer',
+'insurance','risk','assessment','audit','certification','regulation','law',
+'intellectual property','patent','trademark','copyright','license',
+'merger','acquisition','ipo','valuation','funding','investment','venture capital','angel investor',
+'revenue','profit','loss','margin','roi','kpi','metric','analytics','reporting','dashboard',
+'market research','survey','interview','focus group','testing',
+'conversion','funnel','retention','churn','segmentation','persona','journey','experience',
+'brand','identity','tagline','messaging','content','copywriting','seo','sem','ppc',
+'influencer','ambassador','advocate','referral','affiliate','sponsorship','testimonial','review',
+'rating','complaint','resolution','satisfaction','loyalty','engagement',
+'reach','impression','click','goal','objective','strategy','tactic','campaign','initiative','program',
+'timeline','deadline','deliverable','scope','budget','resource','allocation','roadmap',
+
+// 🔥 NEW ADDITIONS (high-value noise)
+'get listed','list your business','add business','add listing','submit business','claim listing','claim your business',
+'remove listing','remove company','edit listing','featured listing','premium listing','top listings',
+'browse categories','all categories','view category','popular searches','top companies','related companies',
+'nearby businesses','similar companies','business listing','company listing','directory listing',
+
+'read more','learn more','see more','view more','click here','tap here','load more','show more',
+'back to top','next page','previous page','open menu','close menu','quick links','useful links',
+
+'log in','sign in','sign up','create account','forgot password','reset password','join now','register now','my account',
+
+'nigeria','lagos','abuja','port harcourt','ibadan','ghana','kenya','africa',
+'head office','main office','regional office','global office',
+
+'latest articles','recent posts','blog post','news update','featured article','press release','trending topics',
+
+'apply now','contact now','buy now','order now','get started','start now','request quote','get quote',
+'subscribe now','download now','watch video','play video',
+
+'follow us','share this','like us','join community','invite friends','leave a comment','post comment',
+
+'all rights reserved','terms and conditions','privacy notice','cookie policy','legal notice','site map'
+],
   irrelevantKeywords: [
     'glassdoor', 'linkedin', 'facebook', 'twitter', 'instagram', 'youtube', 'wikipedia',
     'bloomberg', 'forbes', 'fortune', 'inc', 'reuters', 'techcrunch', 'wsj', 'nytimes', 'washingtonpost', 'theguardian', 'bbc', 'cnn', 'cnbc',
@@ -632,11 +655,22 @@ async function getWebsitesByIndustry(industry, browser) {
   console.log(`Searching TLDs: ${tldsToSearch.join(', ')}`);
 
   for (const tld of tldsToSearch) {
-    let page;
-    try {
-      page = await browser.newPage();
-      await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36');
+  let page;
 
+  try {
+    page = await browser.newPage();
+
+    await page.evaluateOnNewDocument(() => {
+      Object.defineProperty(navigator, 'webdriver', {
+        get: () => false,
+      });
+    });
+
+    await page.setUserAgent(
+      'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120 Safari/537.36'
+    );
+
+    await page.setViewport({ width: 1366, height: 768 });
       // Use HTML version of DuckDuckGo and fix site search parameter
       const query = `"${industry}" contact OR about OR "${industry}" site:${tld.substring(1)}`;
       const searchUrl = `https://html.duckduckgo.com/html/?q=${encodeURIComponent(query)}`;
@@ -706,6 +740,18 @@ async function extractEmailsFromWebsite(url, browser) {
 
   try {
     page = await browser.newPage();
+    await page.evaluateOnNewDocument(() => {
+    Object.defineProperty(navigator, 'webdriver', {
+        get: () => false,
+      });
+    });
+
+    await page.setUserAgent(
+      'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120 Safari/537.36'
+    );
+
+    await page.setViewport({ width: 1366, height: 768 });
+
     const urlObj = new URL(url);
     initialHost = urlObj.hostname;
     // Remove 'www.' if present
@@ -861,24 +907,27 @@ function isValidName(name, title, irrelevantPhrases) {
     return false;
   }
 
-  const lowerName = name.toLowerCase();
-  const lowerTitle = title ? title.toLowerCase() : '';
+  // Normalize everything to lowercase ONCE
+  const normalizedName = name.toLowerCase().trim();
+  const normalizedTitle = (title || '').toLowerCase().trim();
 
-  // Check against irrelevant phrases
-  if (irrelevantPhrases.some(phrase => lowerName.includes(phrase.toLowerCase()) || lowerTitle.includes(phrase.toLowerCase()))) {
-    return false;
-  }
+  // 🔥 Check irrelevant phrases (case-insensitive)
+  const isIrrelevant = irrelevantPhrases.some(phrase => {
+    const p = phrase.toLowerCase();
+    return normalizedName.includes(p) || normalizedTitle.includes(p);
+  });
 
-  // Check for presence of numbers or too many special characters in the name
-  if (/\d/.test(name) || (name.match(/[^a-zA-Z\s'-]/g) || []).length > 2) {
-    return false;
-  }
+  if (isIrrelevant) return false;
 
-  // A name should typically have at least two words (first and last name) or be a single, longer word.
-  const words = name.split(/\s+/).filter(Boolean);
-  if (words.length === 1 && words[0].length < 3) { // e.g., "Dr." or "Mr." alone
-    return false;
-  }
+  // Remove weird characters before validation
+  const cleanName = name.replace(/[^a-zA-Z\s'-]/g, '');
+
+  // Reject names with numbers
+  if (/\d/.test(name)) return false;
+
+  // Reject too short names
+  const words = cleanName.split(/\s+/).filter(Boolean);
+  if (words.length === 1 && words[0].length < 3) return false;
 
   return true;
 }
@@ -896,7 +945,26 @@ function isValidName(name, title, irrelevantPhrases) {
           // Add a random delay before navigating to the page
           const delay = Math.floor(Math.random() * 3000) + 2000; // Random delay between 2 to 5 seconds
           await new Promise(resolve => setTimeout(resolve, delay));
-          await pageInstance.goto(pageUrl, { waitUntil: 'domcontentloaded', timeout: 30000 });
+          await pageInstance.setRequestInterception(true);
+
+pageInstance.on('request', (req) => {
+  const type = req.resourceType();
+  if (['image', 'stylesheet', 'font', 'media'].includes(type)) {
+    req.abort();
+  } else {
+    req.continue();
+  }
+});
+
+try {
+  await pageInstance.goto(pageUrl, {
+    waitUntil: 'domcontentloaded',
+    timeout: 60000
+  });
+} catch (err) {
+  console.log(`⚠️ Skipping slow page: ${pageUrl}, continuing anyway...`);
+  return [];
+}
           const content = await pageInstance.content();
 
           // More aggressive approach: look for common HTML structures and patterns
@@ -910,8 +978,8 @@ function isValidName(name, title, irrelevantPhrases) {
                 return false;
               }
 
-              const lowerName = name.toLowerCase();
-              const lowerTitle = title ? title.toLowerCase() : '';
+              const lowerName = name.toLowerCase().trim();
+              const lowerTitle = (title || '').toLowerCase().trim();
 
               // Check against irrelevant phrases
               if (irrelevantPhrases.some(phrase => lowerName.includes(phrase.toLowerCase()) || lowerTitle.includes(phrase.toLowerCase()))) {
@@ -1084,7 +1152,7 @@ async function main(io) {
 
   let browser = await puppeteer.launch({
     headless: "new",
-    ignoreHTTPSErrors: true, // Add this line
+    ignoreHTTPSErrors: false, // Add this line
     args: [
       '--no-sandbox',
       '--disable-setuid-sandbox',
@@ -1094,7 +1162,8 @@ async function main(io) {
       '--ignore-certificate-errors',
       '--ignore-ssl-errors',
       '--ignore-certificate-errors-spki-list',
-      '--ignore-ssl-errors-ignore-untrusted'
+      '--ignore-ssl-errors-ignore-untrusted',
+      '--disable-blink-features=AutomationControlled'
     ],
   });
 
@@ -1160,7 +1229,7 @@ async function main(io) {
       console.log('Restarting browser and continuing...');
       browser = await puppeteer.launch({
         headless: "new", // Changed to "new" as per deprecation warning
-        ignoreHTTPSErrors: true, // Add this line
+        ignoreHTTPSErrors: false, // Add this line
         args: [
           '--no-sandbox',
           '--disable-setuid-sandbox',
@@ -1170,7 +1239,8 @@ async function main(io) {
           '--ignore-certificate-errors',
           '--ignore-ssl-errors',
           '--ignore-certificate-errors-spki-list',
-          '--ignore-ssl-errors-ignore-untrusted'
+          '--ignore-ssl-errors-ignore-untrusted',
+          '--disable-blink-features=AutomationControlled'
 
         ],
       });
