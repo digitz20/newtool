@@ -182,7 +182,7 @@ irrelevantPhrases: [
     'bloomberg', 'forbes', 'fortune', 'inc', 'reuters', 'techcrunch', 'wsj', 'nytimes', 'washingtonpost', 'theguardian', 'bbc', 'cnn', 'cnbc',
     'businessinsider', 'fastcompany', 'wired', 'marketwatch', 'money.cnn', 'seekingalpha', 'thestreet', 'yahoo', 'ycombinator',
     'crunchbase', 'owler', 'zoominfo', 'apollo.io', 'dnb.com', 'hoovers', 'manta', 'yellowpages', 'yelp', 'thomasnet',
-    'alibaba', 'amazon', 'ebay', 'etsy', 'walmart',
+    'alibaba', 'amazon', 'ebay', 'etsy', 'walmart', 'duckduckgo'
   ],
   
   dataFile: 'leads.json',
