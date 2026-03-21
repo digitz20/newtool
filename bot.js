@@ -72,7 +72,7 @@ const CONFIG = {
   ],
   
   googleResultsPerSearch: 20,
-  maxPagesToVisit: 10,
+  maxPagesToVisit: 20,
   maxEmailsPerDomain: 10, // Maximum number of unique emails to collect per domain
   maxPeopleToScrape: 10, // Maximum number of people (names, titles, emails) to scrape per website
   peoplePageConcurrency: 5, // Number of people pages to scrape concurrently
@@ -709,7 +709,6 @@ async function getWebsitesByIndustry(industry, browser) {
       });
 
       filteredLinks.forEach(link => allLinks.add(link));
-      shuffleArray(Array.from(allLinks)).forEach(link => allLinks.add(link));
 
     } catch (error) {
       console.error(`Could not scrape for TLD ${tld}: ${error.message}`);
@@ -813,10 +812,8 @@ async function extractEmailsFromWebsite(url, browser) {
 
 
           const priorityLinks = internalLinks.filter(link => contactKeywords.some(keyword => link.toLowerCase().includes(keyword)));
-          let otherLinks = internalLinks.filter(link => !contactKeywords.some(keyword => link.toLowerCase().includes(keyword)));
+          const otherLinks = internalLinks.filter(link => !contactKeywords.some(keyword => link.toLowerCase().includes(keyword)));
 
-          // Shuffle otherLinks to introduce randomness
-          otherLinks = shuffleArray(otherLinks);
 
           const linksToQueue = [...priorityLinks, ...otherLinks];
 
