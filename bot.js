@@ -75,6 +75,7 @@ const CONFIG = {
   maxPagesToVisit: 10,
   maxEmailsPerDomain: 10, // Maximum number of unique emails to collect per domain
   maxPeopleToScrape: 10, // Maximum number of people (names, titles, emails) to scrape per website
+  peoplePageConcurrency: 5, // Number of people pages to scrape concurrently
 
   emailDelay: { min: 30000, max: 60000 }, // 30 to 60 seconds
   emailLinks: [
@@ -120,7 +121,7 @@ irrelevantPhrases: [
 'faq','help center','knowledge base','tutorial','guide','manual','documentation','api','developer','code','script','plugin',
 'cookie','analytics','tracking','gdpr','compliance','security','encryption','ssl','https','domain','hosting','server',
 'error','404','500','maintenance','coming soon','under construction','temporarily unavailable','redirect','link','url',
-'button','form','input','textarea','select','checkbox','radio','submit','reset','cancel','close','open','toggle','expand','collapse',
+'button','form','input','John Doe','textarea','select','checkbox','radio','submit','reset','cancel','close','open','toggle','expand','collapse',
 'icon','logo','banner','advertisement','ad','promo','offer','deal','discount','coupon','voucher','gift','free','trial',
 'call to action','cta','landing page','homepage','index','default','welcome','hello','hi','greetings','thanks','thank you',
 'contact form','message','subject','body','attachment','captcha','verification','confirm','validate','authenticate',
@@ -244,8 +245,9 @@ let lastNoLeadsLogTime = 0; // Tracks when "No unsent leads" was last logged
 
 // Helper to create transporter
 function createTransporter(account) {
+  console.log(`Attempting to create transporter for ${account.senderEmail} on host: ${account.smtpHost || 'smtp.gmail.com'}, port: ${account.smtpPort}, secure: ${account.smtpPort === 465}`);
   return nodemailer.createTransport({
-    host: 'smtp.gmail.com', // Gmail SMTP host
+    host: account.smtpHost || 'smtp.gmail.com', // Use account.smtpHost if provided, otherwise default to smtp.gmail.com
     port: account.smtpPort,
     secure: account.smtpPort === 465, // Use SSL if port is 465
     auth: {
@@ -707,6 +709,7 @@ async function getWebsitesByIndustry(industry, browser) {
       });
 
       filteredLinks.forEach(link => allLinks.add(link));
+      shuffleArray(Array.from(allLinks)).forEach(link => allLinks.add(link));
 
     } catch (error) {
       console.error(`Could not scrape for TLD ${tld}: ${error.message}`);
@@ -810,8 +813,10 @@ async function extractEmailsFromWebsite(url, browser) {
 
 
           const priorityLinks = internalLinks.filter(link => contactKeywords.some(keyword => link.toLowerCase().includes(keyword)));
-          const otherLinks = internalLinks.filter(link => !contactKeywords.some(keyword => link.toLowerCase().includes(keyword)));
+          let otherLinks = internalLinks.filter(link => !contactKeywords.some(keyword => link.toLowerCase().includes(keyword)));
 
+          // Shuffle otherLinks to introduce randomness
+          otherLinks = shuffleArray(otherLinks);
 
           const linksToQueue = [...priorityLinks, ...otherLinks];
 
@@ -864,7 +869,12 @@ async function extractEmailsFromWebsite(url, browser) {
 //   // --- NEW SCRAPING LOGIC FOR PEOPLE DATA GOES HERE ---
   console.log(`[INFO] Starting enhanced scraping for people data on ${initialHost}...`);
 
-  const peoplePageKeywords = ['team', 'about', 'leadership', 'our-people', 'management', 'executives', 'board', 'staff', 'people', 'contact', 'who-we-are', 'our-team', 'meet-the-team', 'leadership-team', 'our-leadership', 'company', 'organization', 'personnel', 'employees'];
+const peoplePageKeywords = [
+  'team', 'leadership', 'our-people', 'management', 'executives', 'board',
+  'staff', 'people', 'who-we-are', 'our-team', 'meet-the-team',
+  'leadership-team', 'our-leadership', 'personnel', 'employees',
+  'members', 'faculty', 'advisors', 'founders', 'directors'
+];
   const potentialPeoplePages = new Set();
 
   // First, try to find direct links to people pages from the initial crawl
@@ -874,7 +884,24 @@ async function extractEmailsFromWebsite(url, browser) {
     }
   }
 
-  // If no direct links, try constructing common people page URLs
+  // Next, scrape links from the current page and check for people-related keywords
+  try {
+    const currentLinks = await page.$$eval('a', anchors => anchors.map(a => a.href));
+    for (const link of currentLinks) {
+      try {
+        const urlObj = new URL(link);
+        if (urlObj.hostname === initialHost && peoplePageKeywords.some(keyword => urlObj.pathname.toLowerCase().includes(keyword))) {
+          potentialPeoplePages.add(link);
+        }
+      } catch (e) {
+        // Ignore invalid URLs
+      }
+    }
+  } catch (error) {
+    console.error(`Error scraping links from current page: ${error.message}`);
+  }
+
+  // If no direct links found from visited or current page, try constructing common people page URLs
   if (potentialPeoplePages.size === 0) {
     const domainParts = initialHost.split('.');
     // A bare domain typically has 2 parts (e.g., example.com) or 3 parts if it was originally www.example.com and www. was stripped.
@@ -993,14 +1020,28 @@ try {
               }
 
               // A name should typically have at least two words (first and last name) or be a single, longer word.
-              if (words.length === 1 && words[0].length < 3) { // e.g., "Dr." or "Mr." alone
-                return false;
+              // Refined: If it's a single word, it should be longer than 2 characters and not be a common title abbreviation.
+              if (words.length === 1) {
+                const singleWord = words[0];
+                if (singleWord.length < 3 || ['mr', 'ms', 'dr', 'jr', 'sr'].includes(singleWord.toLowerCase())) {
+                  return false;
+                }
               }
 
               // Exclude common company indicators
               const companyIndicators = ['inc', 'ltd', 'corp', 'llc', 'group', 'solutions', 'technologies', 'company', 'co', 'gmbh', 'ag', 'sa', 'bv', 'pte', 'sarl'];
               if (companyIndicators.some(indicator => lowerName.includes(indicator))) {
                 return false;
+              }
+
+              // New check: A valid name should typically start with a capital letter
+              if (words.length > 0 && !/^[A-Z]/.test(words[0])) {
+                  return false;
+              }
+
+              // New check: Avoid names that are just initials unless they are part of a longer name (e.g., "J D" is okay, but "J" is not)
+              if (words.every(word => word.length === 1 && /^[A-Z]$/.test(word)) && words.length < 2) {
+                  return false;
               }
 
               return true;
@@ -1143,21 +1184,44 @@ try {
     return peopleFound; // Return peopleFound outside the try-finally
   }
 
-  // Visit potential people pages and scrape
-  for (const peoplePageUrl of potentialPeoplePages) {
-    if (scrapedPeople.length >= CONFIG.maxPeopleToScrape) {
-      console.log(`Reached max people to scrape (${CONFIG.maxPeopleToScrape}). Stopping.`);
-      break;
-    }
-    if (!visited.has(peoplePageUrl)) { // Avoid re-visiting pages already crawled for general emails
+  // Visit potential people pages and scrape concurrently
+  const peoplePageUrlsToScrape = Array.from(potentialPeoplePages).filter(url => !visited.has(url));
+  const limit = CONFIG.peoplePageConcurrency;
+  let activePromises = 0;
+  let urlIndex = 0;
+
+  while (urlIndex < peoplePageUrlsToScrape.length || activePromises > 0) {
+    while (activePromises < limit && urlIndex < peoplePageUrlsToScrape.length) {
+      const peoplePageUrl = peoplePageUrlsToScrape[urlIndex++];
+      if (scrapedPeople.length >= CONFIG.maxPeopleToScrape) {
+        console.log(`Reached max people to scrape (${CONFIG.maxPeopleToScrape}). Stopping.`);
+        break;
+      }
+
       console.log(`[INFO] Visiting potential people page: ${peoplePageUrl}`);
-      const peopleOnPage = await scrapePeopleFromPage(peoplePageUrl, browser);
-      peopleOnPage.forEach(person => {
-        if (scrapedPeople.length < CONFIG.maxPeopleToScrape) {
-          scrapedPeople.push(person);
-          scrapedEmails.add(person.email); // Add people's emails to the general scrapedEmails set
-        }
-      });
+      const promise = scrapePeopleFromPage(peoplePageUrl, browser)
+        .then(peopleOnPage => {
+          peopleOnPage.forEach(person => {
+            if (scrapedPeople.length < CONFIG.maxPeopleToScrape) {
+              scrapedPeople.push(person);
+              scrapedEmails.add(person.email);
+            }
+          });
+        })
+        .catch(error => {
+          console.error(`Error scraping people from ${peoplePageUrl} in concurrent task:`, error);
+        })
+        .finally(() => {
+          activePromises--;
+        });
+      activePromises++;
+    }
+    // Wait for at least one promise to settle if there are active promises
+    if (activePromises > 0) {
+      await new Promise(resolve => setTimeout(resolve, 100)); // Small delay to prevent busy-waiting
+    }
+    if (scrapedPeople.length >= CONFIG.maxPeopleToScrape) {
+      break;
     }
   }
   
