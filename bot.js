@@ -1278,6 +1278,7 @@ async function main(io) {
       '--ignore-ssl-errors-ignore-untrusted',
       '--disable-blink-features=AutomationControlled'
     ],
+    protocolTimeout: 60000, // Increase timeout for stealth plugin
   });
 
   // Start email queue processor
@@ -1356,6 +1357,7 @@ async function main(io) {
           '--disable-blink-features=AutomationControlled'
 
         ],
+        protocolTimeout: 60000, // Increase timeout for stealth plugin
       });
     }
   }
