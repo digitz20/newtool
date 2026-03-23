@@ -288,17 +288,33 @@ async function sendEmail(to, lead) {
     .replace('{timestamp}', new Date().toLocaleString());
 
   // Construct the 'from' address using the sender's name if available
-  let fromAddress = account.senderEmail; // Default 'from' address if no Apollo sender is found
+  let fromAddress;
 
-  // console.log('DEBUG: lead.sender in sendEmail:', lead.sender); // <--- ADDED DEBUG LOG
+  // Modify the account.senderEmail to add a +tag before the @
+  const [localPart, domainPart] = account.senderEmail.split('@');
+  let alias = '';
+  if (lead && lead.companyName) {
+    alias = lead.companyName
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-') // Replace non-alphanumeric with hyphens
+      .replace(/^-+|-+$/g, '');    // Trim leading/trailing hyphens
+  }
+
+  // Fallback if alias is empty after sanitization
+  if (!alias) {
+    alias = 'general';
+  }
+
+  const modifiedAccountSenderEmail = `${localPart}+${alias}@${domainPart}`;
+
   if (lead && lead.sender && lead.sender.first_name && lead.sender.last_name && lead.sender.email) {
-    // Use the scraped sender's name with the account email for the 'from' field
-    fromAddress = `"${lead.sender.first_name} ${lead.sender.last_name}" <${account.senderEmail}>`;
+    // Use the scraped sender's name with the modified account email for the 'from' field
+    fromAddress = `"${lead.sender.first_name} ${lead.sender.last_name}" <${modifiedAccountSenderEmail}>`;
     // Replace sender name in template if a placeholder exists
     htmlContent = htmlContent.replace('{sender_name}', `${lead.sender.first_name} ${lead.sender.last_name}`);
   } else {
     const companyName = lead.companyName || 'Our Team'; // Get company name from lead, fallback to 'Our Team'
-    fromAddress = `${companyName} <${account.senderEmail}>`; // Construct a more generic 'from' with company name
+    fromAddress = `${companyName} <${modifiedAccountSenderEmail}>`; // Construct a more generic 'from' with company name
     htmlContent = htmlContent.replace('{sender_name}', companyName); // Fallback if no sender is found
   }
 
@@ -307,8 +323,11 @@ async function sendEmail(to, lead) {
     to: to,
     subject: 'Update on details',
     html: htmlContent,
-    // Removed replyTo header as per user request
+    replyTo: (lead && lead.sender && lead.sender.email) ? lead.sender.email : undefined,
   };
+
+  // console.log('Mail Options before sending:', mailOptions);
+  // console.log('lead.sender.email:', (lead && lead.sender && lead.sender.email) ? lead.sender.email : 'Not available');
 
   try {
     await account.transporter.sendMail(mailOptions);
@@ -808,7 +827,7 @@ async function extractEmailsFromWebsite(url, browser) {
       let success = false;
       for (let i = 0; i < 5; i++) {
         try {
-          await page.goto(currentUrl, { waitUntil: 'domcontentloaded', timeout: 60000 });
+          await page.goto(currentUrl, { waitUntil: 'networkidle2', timeout: 60000 });
           const content = await page.content();
           const emailRegex = /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/gi;
           const foundEmails = content.match(emailRegex) || [];
@@ -1013,7 +1032,7 @@ try {
           const content = await pageInstance.content();
 
           // More aggressive approach: look for common HTML structures and patterns
-          const scrapedElements = await pageInstance.$$eval('h1, h2, h3, h4, h5, h6, p, li, span, div[class*="name"], div[class*="person"], div[class*="member"], div[class*="team"], div[class*="contact"], a[href*="mailto:"]', (elements, irrelevantPhrases) => {
+          const scrapedElements = await pageInstance.$$eval('div[class*="team-member"], div[class*="person-card"], div[class*="staff-profile"], section[class*="team"], section[class*="people"], div[class*="name"], div[class*="person"], div[class*="member"], div[class*="contact"], a[href*="mailto:"], h1, h2, h3, h4, h5, h6, p, li, span', (elements, irrelevantPhrases) => {
             const results = [];
             const emailRegex = /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/;
 
@@ -1028,11 +1047,6 @@ try {
 
               // Check against irrelevant phrases
               if (irrelevantPhrases.some(phrase => lowerName.includes(phrase.toLowerCase()) || lowerTitle.includes(phrase.toLowerCase()))) {
-                return false;
-              }
-
-              // Check for presence of numbers or too many special characters in the name
-              if (/\d/.test(name) || (name.match(/[^a-zA-Z\s'-]/g) || []).length > 1) { // Changed > 2 to > 1
                 return false;
               }
 
@@ -1064,6 +1078,44 @@ try {
 
               // New check: Avoid names that are just initials unless they are part of a longer name (e.g., "J D" is okay, but "J" is not)
               if (words.every(word => word.length === 1 && /^[A-Z]$/.test(word)) && words.length < 2) {
+                  return false;
+              }
+
+              // --- NEW ADDITIONS FOR BETTER NAME VALIDATION ---
+
+              // 1. Check for presence of numbers or too many special characters in the name
+              // Allow apostrophes and hyphens, but limit other special characters
+              if (/\d/.test(name) || (name.match(/[^a-zA-Z\s'-]/g) || []).length > 1) {
+                return false;
+              }
+
+              // 2. Exclude very short names that are likely not full names (e.g., "Dr", "Mr", "CEO")
+              if (words.length === 1 && name.length <= 3) {
+                  return false;
+              }
+
+              // 3. Exclude names that are common single-word titles or departments
+              const commonTitles = ['ceo', 'cto', 'cfo', 'cmo', 'cio', 'hr', 'sales', 'marketing', 'support', 'admin', 'manager', 'director', 'president', 'founder', 'owner', 'partner', 'head', 'lead', 'vice', 'executive', 'staff', 'team', 'contact', 'about', 'home', 'blog', 'news', 'events', 'careers', 'jobs', 'privacy', 'terms', 'legal', 'investors', 'media', 'press', 'solutions', 'products', 'services', 'company', 'group', 'inc', 'ltd', 'corp', 'llc'];
+              if (words.length === 1 && commonTitles.includes(lowerName)) {
+                  return false;
+              }
+
+              // 4. Ensure names have at least two distinct parts (first and last name) unless it's a known single name
+              // This helps filter out single words that might be company names or generic terms
+              if (words.length < 2 && name.length > 3 && !['mary', 'john', 'peter', 'susan', 'david', 'lisa', 'mark', 'anna', 'paul', 'maria'].includes(lowerName)) { // Add more common single names if needed
+                  // If it's a single word, it should be a proper noun (starts with capital, rest lowercase)
+                  if (words.length === 1 && !/^[A-Z][a-z]+$/.test(name)) {
+                      return false;
+                  }
+              }
+
+              // 5. Check for names that are too long (unlikely to be a single person's name)
+              if (name.length > 50) {
+                  return false;
+              }
+
+              // 6. Exclude names that are just a sequence of capital letters (e.g., "ABC Company")
+              if (name === name.toUpperCase() && name.length > 1 && words.length === 1) {
                   return false;
               }
 
