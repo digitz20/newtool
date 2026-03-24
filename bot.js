@@ -915,7 +915,7 @@ const peoplePageKeywords = [
   'team', 'leadership', 'our-people', 'management', 'executives', 'board',
   'staff', 'people', 'who-we-are', 'our-team', 'meet-the-team',
   'leadership-team', 'our-leadership', 'personnel', 'employees',
-  'members', 'faculty', 'advisors', 'founders', 'directors'
+  'members', 'advisors', 'founders', 'directors'
 ];
   const potentialPeoplePages = new Set();
 
@@ -1340,7 +1340,7 @@ async function main(io) {
 
   let browser = await puppeteer.launch({
     headless: "new",
-    ignoreHTTPSErrors: false, // Add this line
+    ignoreHTTPSErrors: true, // Add this line
     args: [
       '--no-sandbox',
       '--disable-setuid-sandbox',
@@ -1418,7 +1418,7 @@ async function main(io) {
       console.log('Restarting browser and continuing...');
       browser = await puppeteer.launch({
         headless: "new", // Changed to "new" as per deprecation warning
-        ignoreHTTPSErrors: false, // Add this line
+        ignoreHTTPSErrors: true, // Add this line
         args: [
           '--no-sandbox',
           '--disable-setuid-sandbox',

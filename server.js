@@ -26,5 +26,12 @@ io.on('connection', (socket) => {
 
 server.listen(PORT, () => {
   console.log(`listening on *:${PORT}`);
-  main(io); // Call the main bot function here
+  console.log('Server started and bot main function is about to be called.');
+  // Initial call to start the bot immediately
+  main(io);
+  // Schedule the bot to run every 30 minutes (1800000 milliseconds)
+  setInterval(() => {
+     console.log('Running bot main function on schedule...');
+     main(io);
+   }, 1800000); 
 });
