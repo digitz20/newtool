@@ -32,6 +32,206 @@ function saveLeads(leads) {
   }
 }
 
+// Helper function to format email local part as a name
+function formatEmailLocalPartAsName(email) {
+  if (!email || typeof email !== 'string') {
+    return 'Our Team';
+  }
+
+  const localPart = email.split('@')[0];
+
+  // List of generic local parts that should not be used as a sender name
+  const genericNames = [
+    'info', 'sales', 'support', 'admin', 'administrator', 'noreply', 'no-reply',
+    'contact', 'webmaster', 'help', 'enquiries', 'enquiry', 'marketing', 'pr',
+    'press', 'billing', 'accounts', 'finance', 'hr', 'jobs', 'careers', 'team',
+    'hello', 'office', 'customerservice', 'feedback', 'abuse', 'security',
+    'privacy', 'legal', 'postmaster', 'hostmaster', 'usenet', 'news', 'web',
+    'dev', 'development', 'test', 'testing', 'noreply', 'noresponse', 'auto',
+    'automated', 'system', 'daemon', 'mailer-daemon', 'undisclosed-recipients',
+    'everyone', 'all', 'group', 'list', 'subscribe', 'unsubscribe', 'newsletter',
+    'digest', 'forum', 'community', 'notifications', 'alert', 'alerts', 'report',
+    'reports', 'status', 'update', 'updates', 'service', 'services', 'client',
+    'clients', 'customer', 'customers', 'guest', 'guests', 'user', 'users',
+    'member', 'members', 'partner', 'partners', 'affiliate', 'affiliates',
+    'investor', 'investors', 'media', 'relations', 'public', 'relations',
+    'management', 'executive', 'ceo', 'cfo', 'cto', 'coo', 'cmo', 'cio', 'cso',
+    'president', 'director', 'manager', 'supervisor', 'coordinator', 'assistant',
+    'reception', 'receptionist', 'frontdesk', 'booking', 'reservations', 'orders',
+    'returns', 'shipping', 'delivery', 'dispatch', 'warehouse', 'inventory',
+    'purchasing', 'procurement', 'vendor', 'vendors', 'supplier', 'suppliers',
+    'donations', 'donate', 'fundraising', 'volunteer', 'volunteers', 'events',
+    'event', 'webinar', 'webinars', 'seminar', 'seminars', 'training', 'education',
+    'academy', 'institute', 'research', 'development', 'rnd', 'innovation',
+    'solutions', 'consulting', 'consultant', 'advisory', 'advisor', 'expert',
+    'experts', 'specialist', 'specialists', 'engineer', 'engineers', 'developer',
+    'developers', 'programmer', 'programmers', 'designer', 'designers', 'artist',
+    'artists', 'creative', 'editor', 'editors', 'writer', 'writers', 'author',
+    'authors', 'publisher', 'publishers', 'moderator', 'moderators', 'adminteam',
+    'supportteam', 'helpdesk', 'techsupport', 'webcontact', 'clientservices',
+    'accountmanager', 'accounting', 'legal', 'privacy', 'terms', 'pressoffice',
+    'mediarelations', 'webmasterteam', 'it', 'tech', 'techteam', 'it-support',
+    'it-helpdesk', 'it-admin', 'itadmin', 'itsupport', 'ithelpdesk', 'itmanager',
+    'it-manager', 'webteam', 'web-team', 'webadmin', 'web-admin', 'webdeveloper',
+    'web-developer', 'webdesigner', 'web-designer', 'webmasterteam', 'webmaster-team',
+    'webmasteradmin', 'webmaster-admin', 'webmasterhelp', 'webmaster-help',
+    'webmasterinfo', 'webmaster-info', 'webmastercontact', 'webmaster-contact',
+    'webmasterfeedback', 'webmaster-feedback', 'webmasterinquiry', 'webmaster-inquiry',
+    'webmastersupport', 'webmaster-support', 'webmastergeneral', 'webmaster-general',
+    'webmasterpublic', 'webmaster-public', 'webmastermedia', 'webmaster-media',
+    'webmasterpress', 'webmaster-press', 'webmastermarketing', 'webmaster-marketing',
+    'webmastersales', 'webmaster-sales', 'webmasterhr', 'webmaster-hr',
+    'webmasterjobs', 'webmaster-jobs', 'webmastercareers', 'webmaster-careers',
+    'webmasterbilling', 'webmaster-billing', 'webmasteraccounts', 'webmaster-accounts',
+    'webmasterfinance', 'webmaster-finance', 'webmasterlegal', 'webmaster-legal',
+    'webmasterprivacy', 'webmaster-privacy', 'webmasterterms', 'webmaster-terms',
+    'webmastersecurity', 'webmaster-security', 'webmasterabuse', 'webmaster-abuse',
+    'webmasterfeedback', 'webmaster-feedback', 'webmasterhello', 'webmaster-hello',
+    'webmasteroffice', 'webmaster-office', 'webmastercustomerservice', 'webmaster-customerservice',
+    'webmasterfeedback', 'webmaster-feedback', 'webmasterabuse', 'webmaster-abuse',
+    'webmastersecurity', 'webmaster-security', 'webmasterprivacy', 'webmaster-privacy',
+    'webmasterlegal', 'webmaster-legal', 'webmasterpostmaster', 'webmaster-postmaster',
+    'webmasterhostmaster', 'webmaster-hostmaster', 'webmasterusenet', 'webmaster-usenet',
+    'webmasternews', 'webmaster-news', 'webmasterweb', 'webmaster-web',
+    'webmasterdev', 'webmaster-dev', 'webmasterdevelopment', 'webmaster-development',
+    'webmastertest', 'webmaster-test', 'webmastertesting', 'webmaster-testing',
+    'webmasternoreply', 'webmaster-noreply', 'webmasternoresponse', 'webmaster-noresponse',
+    'webmasterauto', 'webmaster-auto', 'webmasterautomated', 'webmaster-automated',
+    'webmastersystem', 'webmaster-system', 'webmasterdaemon', 'webmaster-daemon',
+    'webmastermailer-daemon', 'webmaster-mailer-daemon', 'webmasterundisclosed-recipients',
+    'webmaster-undisclosed-recipients', 'webmastereveryone', 'webmaster-everyone',
+    'webmasterall', 'webmaster-all', 'webmastergroup', 'webmaster-group',
+    'webmasterlist', 'webmaster-list', 'webmastersubscribe', 'webmaster-subscribe',
+    'webmasterunsubscribe', 'webmaster-unsubscribe', 'webmasternewsletter', 'webmaster-newsletter',
+    'webmasterdigest', 'webmaster-digest', 'webmasterforum', 'webmaster-forum',
+    'webmastercommunity', 'webmaster-community', 'webmasternotifications', 'webmaster-notifications',
+    'webmasteralert', 'webmaster-alert', 'webmasteralerts', 'webmaster-alerts',
+    'webmasterreport', 'webmaster-report', 'webmasterreports', 'webmaster-reports',
+    'webmasterstatus', 'webmaster-status', 'webmasterupdate', 'webmaster-update',
+    'webmasterupdates', 'webmaster-updates', 'webmasterservice', 'webmaster-service',
+    'webmasterservices', 'webmaster-services', 'webmasterclient', 'webmaster-client',
+    'webmasterclients', 'webmaster-clients', 'webmastercustomer', 'webmaster-customer',
+    'webmastercustomers', 'webmaster-customers', 'webmasterguest', 'webmaster-guest',
+    'webmasterguests', 'webmaster-guests', 'webmasteruser', 'webmaster-user',
+    'webmasterusers', 'webmaster-users', 'webmastermember', 'webmaster-member',
+    'webmastermembers', 'webmaster-members', 'webmasterpartner', 'webmaster-partner',
+    'webmasterpartners', 'webmaster-partners', 'webmasteraffiliate', 'webmaster-affiliate',
+    'webmasteraffiliates', 'webmaster-affiliates', 'webmasterinvestor', 'webmaster-investor',
+    'webmasterinvestors', 'webmaster-investors', 'webmastermedia', 'webmaster-media',
+    'webmasterrelations', 'webmaster-relations', 'webmasterpublic', 'webmaster-public',
+    'webmastermanagement', 'webmaster-management', 'webmasterexecutive', 'webmaster-executive',
+    'webmasterceo', 'webmaster-ceo', 'webmastercfo', 'webmaster-cfo',
+    'webmastercto', 'webmaster-cto', 'webmastercoo', 'webmaster-coo',
+    'webmastercmo', 'webmaster-cmo', 'webmastercio', 'webmaster-cio',
+    'webmastercso', 'webmaster-cso', 'webmasterpresident', 'webmaster-president',
+    'webmasterdirector', 'webmaster-director', 'webmastermanager', 'webmaster-manager',
+    'webmastersupervisor', 'webmaster-supervisor', 'webmastercoordinator', 'webmaster-coordinator',
+    'webmasterassistant', 'webmaster-assistant', 'webmasterreception', 'webmaster-reception',
+    'webmasterreceptionist', 'webmaster-receptionist', 'webmasterfrontdesk', 'webmaster-frontdesk',
+    'webmasterbooking', 'webmaster-booking', 'webmasterreservations', 'webmaster-reservations',
+    'webmasterorders', 'webmaster-orders', 'webmasterreturns', 'webmaster-returns',
+    'webmastershipping', 'webmaster-shipping', 'webmasterdelivery', 'webmaster-delivery',
+    'webmasterdispatch', 'webmaster-dispatch', 'webmasterwarehouse', 'webmaster-warehouse',
+    'webmasterinventory', 'webmaster-inventory', 'webmasterpurchasing', 'webmaster-purchasing',
+    'webmasterprocurement', 'webmaster-procurement', 'webmastervendor', 'webmaster-vendor',
+    'webmastervendors', 'webmaster-vendors', 'webmastersupplier', 'webmaster-supplier',
+    'webmastersuppliers', 'webmaster-suppliers', 'webmasterdonations', 'webmaster-donations',
+    'webmasterdonate', 'webmaster-donate', 'webmasterfundraising', 'webmaster-fundraising',
+    'webmastervolunteer', 'webmaster-volunteer', 'webmastervolunteers', 'webmaster-volunteers',
+    'webmasterevents', 'webmaster-events', 'webmasterevent', 'webmaster-event',
+    'webmasterwebinar', 'webmaster-webinar', 'webmasterwebinars', 'webmaster-webinars',
+    'webmasterseminar', 'webmaster-seminar', 'webmasterseminars', 'webmaster-seminars',
+    'webmastertraining', 'webmaster-training', 'webmastereducation', 'webmaster-education',
+    'webmasteracademy', 'webmaster-academy', 'webmasterinstitute', 'webmaster-institute',
+    'webmasterresearch', 'webmaster-research', 'webmasterdevelopment', 'webmaster-development',
+    'webmasterrnd', 'webmaster-rnd', 'webmasterinnovation', 'webmaster-innovation',
+    'webmastersolutions', 'webmaster-solutions', 'webmasterconsulting', 'webmaster-consulting',
+    'webmasterconsultant', 'webmaster-consultant', 'webmasteradvisory', 'webmaster-advisory',
+    'webmasteradvisor', 'webmaster-advisor', 'webmasterexpert', 'webmaster-expert',
+    'webmasterexperts', 'webmaster-experts', 'webmasterspecialist', 'webmaster-specialist',
+    'webmasterspecialists', 'webmaster-specialists', 'webmasterengineer', 'webmaster-engineer',
+    'webmasterengineers', 'webmaster-engineers', 'webmasterdeveloper', 'webmaster-developer',
+    'webmasterdevelopers', 'webmaster-developers', 'webmasterprogrammer', 'webmaster-programmer',
+    'webmasterprogrammers', 'webmaster-programmers', 'webmasterdesigner', 'webmaster-designer',
+    'webmasterdesigners', 'webmaster-designers', 'webmasterartist', 'webmaster-artist',
+    'webmasterartists', 'webmaster-artists', 'webmastercreative', 'webmaster-creative',
+    'webmastereditor', 'webmaster-editor', 'webmastereditors', 'webmaster-editors',
+    'webmasterwriter', 'webmaster-writer', 'webmasterwriters', 'webmaster-writers',
+    'webmasterauthor', 'webmaster-author', 'webmasterauthors', 'webmaster-authors',
+    'webmasterpublisher', 'webmaster-publisher', 'webmasterpublishers', 'webmaster-publishers',
+    'webmastermoderator', 'webmaster-moderator', 'webmastermoderators', 'webmaster-moderators'
+  ];
+
+  // Check if the local part is a generic name
+  if (genericNames.includes(localPart.toLowerCase())) {
+    return 'Our Team';
+  }
+
+  // Replace common separators with spaces and split into words
+  const words = localPart.replace(/[._-]/g, ' ').split(' ');
+
+  // Capitalize each word and join them
+  const formattedName = words.map(word => {
+    if (word.length === 0) return '';
+    return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
+  }).join(' ');
+
+  // If after formatting, the name is empty or still looks generic (e.g., just initials),
+  // or if it's a single letter, fall back to 'Our Team'
+  if (!formattedName.trim() || formattedName.length <= 2) {
+    return 'Our Team';
+  }
+
+  return formattedName;
+}
+
+/**
+ * Selects the best sender name for a lead based on available information.
+ * Prioritizes scraped person's name, then non-generic email local parts,
+ * then company name, finally defaulting to 'Our Team'.
+ * @param {object} lead - The lead object containing emails, companyName, and sender info.
+ * @returns {string} The selected sender name.
+ */
+function selectBestSenderName(lead) {
+  // 1. Prioritize scraped person's name if available
+  if (lead && lead.sender && lead.sender.first_name && lead.sender.last_name) {
+    const scrapedName = `${lead.sender.first_name} ${lead.sender.last_name}`;
+    // Ensure the scraped name isn't too short or generic-looking
+    if (scrapedName.trim().length > 2 && !CONFIG.genericNames.includes(scrapedName.toLowerCase())) {
+      return scrapedName;
+    }
+  }
+
+  // 2. Look for a non-generic name from email local parts
+  let bestEmailName = '';
+  if (lead && lead.emails && lead.emails.length > 0) {
+    for (const email of lead.emails) {
+      const derivedName = formatEmailLocalPartAsName(email);
+      if (derivedName !== 'Our Team') {
+        // Found a non-generic name, use it
+        bestEmailName = derivedName;
+        break; // Take the first good one
+      }
+    }
+  }
+
+  if (bestEmailName) {
+    return bestEmailName;
+  }
+
+  // 3. Fallback to company name if available and not too generic
+  if (lead && lead.companyName) {
+    const companyName = lead.companyName.trim();
+    // Check if company name is not just a generic term or too short
+    if (companyName.length > 2 && !CONFIG.genericNames.includes(companyName.toLowerCase())) {
+      return companyName;
+    }
+  }
+
+  // 4. Default to 'Our Team'
+  return 'Our Team';
+}
+
 // ---------- CONFIG ----------
 const CONFIG = {
   industries: [
@@ -263,7 +463,7 @@ function createTransporter(account) {
 
 
 // ---------- EMAIL FUNCTION ----------
-async function sendEmail(to, lead) {
+async function sendEmail(to, lead, leadSenderName) {
   if (emailSendingPaused) {
     console.log('Email sending is currently paused.');
     return false;
@@ -287,7 +487,7 @@ async function sendEmail(to, lead) {
     .replace('{recipient_email}', to)
     .replace('{timestamp}', new Date().toLocaleString());
 
-  // Construct the 'from' address using the sender's name if available
+  // Construct the 'from' address using the pre-determined leadSenderName
   let fromAddress;
 
   // Modify the account.senderEmail to add a +tag before the @
@@ -307,16 +507,9 @@ async function sendEmail(to, lead) {
 
   const modifiedAccountSenderEmail = `${localPart}+${alias}@${domainPart}`;
 
-  if (lead && lead.sender && lead.sender.first_name && lead.sender.last_name && lead.sender.email) {
-    // Use the scraped sender's name with the modified account email for the 'from' field
-    fromAddress = `"${lead.sender.first_name} ${lead.sender.last_name}" <${modifiedAccountSenderEmail}>`;
-    // Replace sender name in template if a placeholder exists
-    htmlContent = htmlContent.replace('{sender_name}', `${lead.sender.first_name} ${lead.sender.last_name}`);
-  } else {
-    const companyName = lead.companyName || 'Our Team'; // Get company name from lead, fallback to 'Our Team'
-    fromAddress = `${companyName} <${modifiedAccountSenderEmail}>`; // Construct a more generic 'from' with company name
-    htmlContent = htmlContent.replace('{sender_name}', companyName); // Fallback if no sender is found
-  }
+  // Use the leadSenderName directly
+  fromAddress = `${leadSenderName} <${modifiedAccountSenderEmail}>`;
+  htmlContent = htmlContent.replace('{sender_name}', leadSenderName);
 
   const mailOptions = {
     from: fromAddress,
@@ -493,6 +686,9 @@ async function emailQueueProcessor() {
   console.log(`Found ${unsentLeads.length} leads with unsent emails.`); // Modified log
 
   for (const lead of unsentLeads) {
+    // Determine the best sender name for this lead once
+    const leadSenderName = selectBestSenderName(lead);
+
     if (!lead.emails || lead.emails.length === 0) {
       lead.emailsSent = true;
       console.log(`Lead ${lead.website} has no emails. Marking as sent.`); // Added log
@@ -517,7 +713,7 @@ async function emailQueueProcessor() {
         break; // Break from sending emails for the CURRENT lead
       }
 
-      const success = await sendEmail(email, lead);
+      const success = await sendEmail(email, lead, leadSenderName);
       if (success) {
         console.log(`Successfully sent email to ${email}.`); // Modified log
         sentEmailsGlobal.add(email.toLowerCase());
@@ -1004,31 +1200,32 @@ function isValidName(name, title, irrelevantPhrases) {
 
     try {
       pageInstance = await browser.newPage(); // Create a new page for this function call
+      await pageInstance.setRequestInterception(true);
+
+      pageInstance.on('request', (req) => {
+        const type = req.resourceType();
+        if (['image', 'stylesheet', 'font', 'media'].includes(type)) {
+          req.abort();
+        } else {
+          req.continue();
+        }
+      });
+
       for (let attempt = 1; attempt <= maxRetries; attempt++) {
         try {
           // Add a random delay before navigating to the page
           // const delay = Math.floor(Math.random() * 3000) + 2000; // Random delay between 2 to 5 seconds
           // await new Promise(resolve => setTimeout(resolve, delay));
-          await pageInstance.setRequestInterception(true);
 
-pageInstance.on('request', (req) => {
-  const type = req.resourceType();
-  if (['image', 'stylesheet', 'font', 'media'].includes(type)) {
-    req.abort();
-  } else {
-    req.continue();
-  }
-});
-
-try {
-  await pageInstance.goto(pageUrl, {
-    waitUntil: 'domcontentloaded',
-    timeout: 60000
-  });
-} catch (err) {
-  console.log(`Skipping slow page: ${pageUrl}, continuing anyway...`);
-  return [];
-}
+          try {
+            await pageInstance.goto(pageUrl, {
+              waitUntil: 'domcontentloaded',
+              timeout: 60000
+            });
+          } catch (err) {
+            console.log(`Skipping slow page: ${pageUrl}, continuing anyway...`);
+            return [];
+          }
           const content = await pageInstance.content();
 
           // More aggressive approach: look for common HTML structures and patterns
