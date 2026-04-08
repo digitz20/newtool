@@ -1627,6 +1627,7 @@ async function main(io) {
           '--ignore-ssl-errors-ignore-untrusted',
           '--disable-blink-features=AutomationControlled'
 
+          
         ],
         protocolTimeout: 90000, // Increase timeout for stealth plugin
       });
