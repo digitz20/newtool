@@ -1569,35 +1569,39 @@ async function main(io) {
         const websites = await getWebsitesByIndustry(industry, browser);
         console.log(`Found ${websites.length} websites for industry ${industry}.`); // Added log
 
-        for (const website of websites) {
-          if (leads.some(l => l.website === website)) {
-            console.log(`Skipping already processed website: ${website}`);
-            continue;
-          }
+        const concurrencyLimit = 5; // Adjust based on your server
+        for (let i = 0; i < websites.length; i += concurrencyLimit) {
+          const batch = websites.slice(i, i + concurrencyLimit);
+          await Promise.all(batch.map(async (website) => {
+            if (leads.some(l => l.website === website)) {
+              console.log(`Skipping already processed website: ${website}`);
+              return;
+            }
 
-          const { emails, domain, companyName, scrapedPeople, sender } = await extractEmailsFromWebsite(website, browser);
-          // A lead is valid if we found any emails (scraped or Apollo) or Apollo contacts
-          if (emails.length > 0 || scrapedPeople.length > 0) {
-            const lead = {
-              website,
-              domain, // Store the extracted domain
-              companyName, // Store the extracted company name
-              emails, // Emails found via scraping and Apollo (excluding sender)
-              scrapedPeople, // All relevant Apollo contacts
-              sender, // The selected sender contact from Apollo
-              industry,
-              timestamp: new Date().toISOString(),
-              emailsSent: false,
-              sentEmailLinks: [],
-            };
-            leads.push(lead);
-            saveLeads(leads);
-            console.log(`Saved new lead for ${website}. Total leads: ${leads.length}`); // Added log
-            io.emit('new-lead', lead);
-          } else {
-            console.log(`No emails found for ${website}.`); // Added log
-        } // Closing brace for 'for (const website of websites)' loop
-      } // <--- ADDED: Closing brace for 'for (const industry of shuffledIndustries)' loop
+            const { emails, domain, companyName, scrapedPeople, sender } = await extractEmailsFromWebsite(website, browser);
+            // A lead is valid if we found any emails (scraped or Apollo) or Apollo contacts
+            if (emails.length > 0 || scrapedPeople.length > 0) {
+              const lead = {
+                website,
+                domain, // Store the extracted domain
+                companyName, // Store the extracted company name
+                emails, // Emails found via scraping and Apollo (excluding sender)
+                scrapedPeople, // All relevant Apollo contacts
+                sender, // The selected sender contact from Apollo
+                industry,
+                timestamp: new Date().toISOString(),
+                emailsSent: false,
+                sentEmailLinks: [],
+              };
+              leads.push(lead);
+              saveLeads(leads);
+              console.log(`Saved new lead for ${website}. Total leads: ${leads.length}`); // Added log
+              io.emit('new-lead', lead);
+            } else {
+              console.log(`No emails found for ${website}.`); // Added log
+            }
+          }));
+        }
 
       console.log('\nFinished scraping all industries. Restarting in a bit...');
       if (io) { // Only emit if io is defined
