@@ -29,9 +29,9 @@ server.listen(PORT, () => {
   console.log('Server started and bot main function is about to be called.');
   // Initial call to start the bot immediately
   main(io);
-  // Schedule the bot to run every 30minutes (1800000 milliseconds)
+  // Schedule the bot to run every 45minutes (2700000 milliseconds)
   setInterval(() => {
      console.log('Running bot main function on schedule...');
      main(io);
-   }, 1800000); 
+   }, 2700000); 
 });

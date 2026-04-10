@@ -1107,10 +1107,10 @@ async function extractEmailsFromWebsite(url, browser) {
   console.log(`[INFO] Starting enhanced scraping for people data on ${initialHost}...`);
 
 const peoplePageKeywords = [
-  'team', 'leadership', 'our-people', 'management', 'executives', 'board',
-  'staff', 'people', 'who-we-are', 'our-team', 'meet-the-team',
-  'leadership-team', 'our-leadership', 'personnel', 'employees',
-  'members', 'advisors', 'founders', 'directors'
+  'team','contact', 'management','about-us', 'executives', 'board',
+  'staff', 'who-we-are', 'our-team', 'meet-the-team',
+  'personnel', 'employees',
+  'members', 'directors'
 ];
   const potentialPeoplePages = new Set();
 
