@@ -11,6 +11,8 @@ const io = new Server(server);
 
 const PORT = process.env.PORT || 2367;
 
+let isBotRunning = false;
+
 app.use(express.static(path.join(__dirname)));
 
 app.get('/', (req, res) => {
@@ -31,7 +33,14 @@ server.listen(PORT, () => {
   main(io);
   // Schedule the bot to run every 45minutes (2700000 milliseconds)
   setInterval(() => {
-     console.log('Running bot main function on schedule...');
-     main(io);
-   }, 2700000); 
+    if (!isBotRunning) {
+      console.log('Running bot main function on schedule...');
+      isBotRunning = true;
+      main(io).finally(() => {
+        isBotRunning = false;
+      });
+    } else {
+      console.log('Bot is still running, skipping this interval.');
+    }
+  }, 2700000); 
 });
