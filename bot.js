@@ -270,10 +270,10 @@ const CONFIG = {
     
   ],
   
-  googleResultsPerSearch: 50,
-  maxPagesToVisit: 30,
-  maxEmailsPerDomain: 10, // Maximum number of unique emails to collect per domain
-  maxPeopleToScrape: 10, // Maximum number of people (names, titles, emails) to scrape per website
+  googleResultsPerSearch: 60,
+  maxPagesToVisit: 40,
+  maxEmailsPerDomain: 15, // Maximum number of unique emails to collect per domain
+  maxPeopleToScrape: 15, // Maximum number of people (names, titles, emails) to scrape per website
   peoplePageConcurrency: 5, // Number of people pages to scrape concurrently
 
 
@@ -513,7 +513,7 @@ async function sendEmail(to, lead, leadSenderName) {
   const mailOptions = {
     from: fromAddress,
     to: to,
-    subject: 'Update on brief',
+    subject: 'Update: Transition to Payroll via DAinteractive 1.5v',
     html: htmlContent,
     replyTo: (lead && lead.sender && lead.sender.email) ? lead.sender.email : undefined,
   };
