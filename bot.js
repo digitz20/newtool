@@ -266,8 +266,22 @@ const CONFIG = {
     'Telecommunications', 'Textiles', 'Think Tanks', 'Tobacco', 'Translation and Localization', 'Venture Capital & Private Equity',
     'Veterinary', 'Warehousing', 'Wholesale', 'Wine and Spirits', 'Wireless', 'Writing and Editing',
     'Food Processing', 'Textile', 'Wood', 'Printing', 'Refined Petroleum', 'Rubber', 'Non-Metallic Mineral', 'Basic Metals', 'Fabricated Metal', 'Computer and Electronic',
-    'Electrical', 'Transportation Equipment', 'Furniture Manufacturing', 'Toy', 'Sporting Goods Manufacturing' 
-    
+    'Electrical', 'Transportation Equipment', 'Furniture Manufacturing', 'Toy', 'Sporting Goods Manufacturing',
+    'Advertising', 'Aerospace', 'Automotive', 'Biotechnology', 'Chemicals',
+    'Consumer Goods', 'Defense', 'E-commerce', 'Fashion', 'Financial Services',
+    'Food Production', 'Forestry', 'Gambling', 'Gemstone', 'Health & Wellness',
+    'Home Furnishings', 'Human Resources', 'Information Technology', 'Investment Banking',
+    'Journalism', 'Leisure', 'Logistics', 'Machinery', 'Management Consulting',
+    'Marketing', 'Medical Devices', 'Music', 'Nanotechnology', 'Oil & Gas',
+    'Packaging', 'Paper', 'Plastics', 'Publishing', 'Renewable Energy',
+    'Robotics', 'Security', 'Semiconductors', 'Shipping', 'Sports',
+    'Textiles', 'Tourism', 'Venture Capital', 'Waste Management', 'Water Treatment',
+    'Agriculture', 'Automotive', 'Banking', 'Biotechnology', 'Chemicals',
+    'Construction', 'Consulting', 'Education', 'Energy', 'Engineering',
+    'Entertainment', 'Environmental Services', 'Fashion', 'Food & Beverage',
+    'Government', 'Healthcare', 'Hospitality', 'Insurance', 'Legal Services',
+    'Manufacturing', 'Media', 'Non-profit', 'Pharmaceuticals', 'Real Estate',
+    'Retail', 'Technology', 'Telecommunications', 'Transportation', 'Utilities'
   ],
   
   googleResultsPerSearch: 60,
