@@ -40,12 +40,6 @@ function formatEmailLocalPartAsName(email) {
 
   const localPart = email.split('@')[0];
 
-  // List of generic local parts that should not be used as a sender name
-  // Check if the local part is a generic name
-  if (CONFIG.genericNames.includes(localPart.toLowerCase())) {
-    return 'Our Team';
-  }
-
   // Replace common separators with spaces and split into words
   const words = localPart.replace(/[._-]/g, ' ').split(' ');
 
@@ -57,7 +51,7 @@ function formatEmailLocalPartAsName(email) {
 
   // If after formatting, the name is empty or still looks generic (e.g., just initials),
   // or if it's a single letter, fall back to 'Our Team'
-  if (!formattedName.trim() || formattedName.length <= 2) {
+  if (!formattedName.trim() || formattedName.length < 2) {
     return 'Our Team';
   }
 
