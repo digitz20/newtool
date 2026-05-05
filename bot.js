@@ -888,6 +888,50 @@ function saveSentEmails(sentEmails) {
   fs.writeFileSync(SENT_EMAILS_FILE, JSON.stringify(Array.from(sentEmails), null, 2));
 }
 
+async function findPeoplePage(page, websiteUrl) {
+  const peoplePageKeywords = ['team', 'about', 'contact', 'leadership', 'management', 'board', 'staff', 'people', 'our story'];
+  const potentialUrls = await page.$$eval('a, button', (elements, keywords, baseUrl) => {
+    const urls = new Set();
+    elements.forEach(element => {
+      const text = element.textContent ? element.textContent.toLowerCase() : '';
+      const href = element.href || element.getAttribute('data-href'); // Get href for <a> or data-href for <button>
+
+      if (href && href.startsWith(baseUrl)) {
+        for (const keyword of keywords) {
+          if (text.includes(keyword)) {
+            urls.add(href);
+            break;
+          }
+        }
+      }
+    });
+    return Array.from(urls);
+  }, peoplePageKeywords, websiteUrl);
+
+  return potentialUrls;
+}
+
+async function findContactPage(page, websiteUrl) {
+  const contactPageKeywords = ['contact', 'reach us', 'get in touch', 'support', 'enquiry', 'inquiry'];
+  const potentialUrls = await page.$$eval('a, button', (elements, keywords, baseUrl) => {
+    const urls = new Set();
+    elements.forEach(element => {
+      const text = element.textContent ? element.textContent.toLowerCase() : '';
+      const href = element.href || element.getAttribute('data-href'); // Get href for <a> or data-href for <button>
+      if (href && href.startsWith(baseUrl)) {
+        for (const keyword of keywords) {
+          if (text.includes(keyword)) {
+            urls.add(href);
+            break;
+          }
+        }
+      }
+    });
+    return Array.from(urls);
+  }, contactPageKeywords, websiteUrl);
+  return potentialUrls;
+}
+
 // function saveSentLeads(sentLeads) {
 //   const sentLeadsFile = path.join(__dirname, 'sent_leads.json');
 //   console.log(`Moving ${sentLeads.length} completed lead(s) to ${sentLeadsFile}`);
@@ -1120,51 +1164,26 @@ async function extractEmailsFromWebsite(url, browser) {
 //   // --- NEW SCRAPING LOGIC FOR PEOPLE DATA GOES HERE ---
   console.log(`[INFO] Starting enhanced scraping for people data on ${initialHost}...`);
 
-const peoplePageKeywords = [
-  'team','contact', 'management','about-us', 'executives', 'board',
-  'staff', 'who-we-are', 'our-team', 'meet-the-team',
-  'personnel', 'employees',
-  'members', 'directors'
-];
-  const potentialPeoplePages = new Set();
+  const peoplePages = await findPeoplePage(page, url);
+  const contactPages = await findContactPage(page, url);
 
-  // First, try to find direct links to people pages from the initial crawl
-  for (const link of visited) {
-    if (peoplePageKeywords.some(keyword => link.toLowerCase().includes(keyword))) {
-      potentialPeoplePages.add(link);
-    }
-  }
+  const potentialPeoplePages = new Set([...peoplePages, ...contactPages]);
 
-  // Next, scrape links from the current page and check for people-related keywords
-  try {
-    const currentLinks = await page.$$eval('a', anchors => anchors.map(a => a.href));
-    for (const link of currentLinks) {
-      try {
-        const urlObj = new URL(link);
-        if (urlObj.hostname === initialHost && peoplePageKeywords.some(keyword => urlObj.pathname.toLowerCase().includes(keyword))) {
-          potentialPeoplePages.add(link);
-        }
-      } catch (e) {
-        // Ignore invalid URLs
-      }
-    }
-  } catch (error) {
-    console.error(`Error scraping links from current page: ${error.message}`);
-  }
-
-  // If no direct links found from visited or current page, try constructing common people page URLs
+  // If no direct links found, try constructing common people page URLs as a fallback
   if (potentialPeoplePages.size === 0) {
+    const peoplePageKeywords = [
+      'team','contact', 'management','about-us', 'executives', 'board',
+      'staff', 'who-we-are', 'our-team', 'meet-the-team',
+      'personnel', 'employees',
+      'members', 'directors'
+    ];
     const domainParts = initialHost.split('.');
-    // A bare domain typically has 2 parts (e.g., example.com) or 3 parts if it was originally www.example.com and www. was stripped.
-    // If it has more than 2 parts, it likely already includes a subdomain (e.g., hr.utmb.edu).
-    const isBareDomain = domainParts.length <= 2; 
+    const isBareDomain = domainParts.length <= 2;
 
     for (const keyword of peoplePageKeywords) {
-      // Always try the initialHost as is
       potentialPeoplePages.add(`https://${initialHost}/${keyword}`);
       potentialPeoplePages.add(`https://${initialHost}/${keyword}/`);
 
-      // Only try prepending 'www.' if it's a bare domain
       if (isBareDomain) {
         potentialPeoplePages.add(`https://www.${initialHost}/${keyword}`);
         potentialPeoplePages.add(`https://www.${initialHost}/${keyword}/`);
@@ -1254,34 +1273,61 @@ function isValidName(name, title, irrelevantPhrases) {
 
               const lowerName = name.toLowerCase().trim();
               const lowerTitle = (title || '').toLowerCase().trim();
+              const words = name.split(/\s+/).filter(Boolean);
 
-              // Check against irrelevant phrases
-              if (irrelevantPhrases.some(phrase => lowerName.includes(phrase.toLowerCase()) || lowerTitle.includes(phrase.toLowerCase()))) {
+              // Consolidate all irrelevant terms
+              const commonTitles = ['ceo', 'cto', 'cfo', 'cmo', 'cio', 'hr', 'sales', 'marketing', 'support', 'admin', 'manager', 'director', 'president', 'founder', 'owner', 'partner', 'head', 'lead', 'vice', 'executive', 'staff', 'team', 'contact', 'about', 'home', 'blog', 'news', 'events', 'careers', 'jobs', 'privacy', 'terms', 'legal', 'investors', 'media', 'press', 'solutions', 'products', 'services', 'company', 'group', 'inc', 'ltd', 'corp', 'llc', 'gmbh', 'ag', 'sa', 'bv', 'pte', 'sarl', 'dr', 'mr', 'ms', 'jr', 'sr', 'prof', 'eng', 'phd', 'm.d.', 'm.d', 'esq', 'cpa', 'cfa', 'p.e.', 'p.e'];
+              const allIrrelevantTerms = new Set([...irrelevantPhrases.map(p => p.toLowerCase()), ...commonTitles]);
+
+              // Check against all irrelevant terms
+              if (Array.from(allIrrelevantTerms).some(phrase => lowerName.includes(phrase) || lowerTitle.includes(phrase))) {
                 return false;
               }
 
               // Exclude names that are all uppercase and short (likely acronyms or company names)
-              const words = name.split(/\s+/).filter(Boolean);
               if (name === name.toUpperCase() && name.length <= 5 && words.length === 1) {
                 return false;
               }
 
-              // A name should typically have at least two words (first and last name) or be a single, longer word.
-              // Refined: If it's a single word, it should be longer than 2 characters and not be a common title abbreviation.
+              // Refined single-word validation:
+              // If it's a single word, it should be a proper noun (starts with capital, rest lowercase)
+              // and not be in the irrelevant terms list.
               if (words.length === 1) {
                 const singleWord = words[0];
-                if (singleWord.length < 3 || ['mr', 'ms', 'dr', 'jr', 'sr'].includes(singleWord.toLowerCase())) {
+                if (!/^[A-Z][a-z]+$/.test(singleWord) || allIrrelevantTerms.has(singleWord.toLowerCase())) {
                   return false;
                 }
               }
 
-              // Exclude common company indicators
-              const companyIndicators = ['inc', 'ltd', 'corp', 'llc', 'group', 'solutions', 'technologies', 'company', 'co', 'gmbh', 'ag', 'sa', 'bv', 'pte', 'sarl'];
-              if (companyIndicators.some(indicator => lowerName.includes(indicator))) {
+              // Check for presence of numbers or too many special characters in the name
+              // Allow apostrophes and hyphens, but limit other special characters
+              if (/\d/.test(name) || (name.match(/[^a-zA-Z\s'-]/g) || []).length > 1) {
                 return false;
               }
 
-              // New check: A valid name should typically start with a capital letter
+              // Exclude very short names that are likely not full names (e.g., "Dr", "Mr", "CEO")
+              if (words.length === 1 && name.length <= 3) {
+                  return false;
+              }
+
+              // Ensure names have at least two distinct parts (first and last name) unless it's a known single name
+              // This helps filter out single words that might be company names or generic terms
+              // Relaxed this slightly to allow for valid single names that pass other checks
+              if (words.length < 2 && name.length > 3 && !/^[A-Z][a-z]+$/.test(name)) {
+                  return false;
+              }
+
+              // Check for names that are too long (unlikely to be a single person's name)
+              if (name.length > 50) {
+                  return false;
+              }
+
+              // Exclude names that are just a sequence of capital letters (e.g., "ABC Company")
+              if (name === name.toUpperCase() && name.length > 1 && words.length === 1) {
+                  return false;
+              }
+
+              // New check: Names should typically start with a capital letter
               if (words.length > 0 && !/^[A-Z]/.test(words[0])) {
                   return false;
               }
@@ -1291,41 +1337,8 @@ function isValidName(name, title, irrelevantPhrases) {
                   return false;
               }
 
-              // --- NEW ADDITIONS FOR BETTER NAME VALIDATION ---
-
-              // 1. Check for presence of numbers or too many special characters in the name
-              // Allow apostrophes and hyphens, but limit other special characters
-              if (/\d/.test(name) || (name.match(/[^a-zA-Z\s'-]/g) || []).length > 1) {
-                return false;
-              }
-
-              // 2. Exclude very short names that are likely not full names (e.g., "Dr", "Mr", "CEO")
-              if (words.length === 1 && name.length <= 3) {
-                  return false;
-              }
-
-              // 3. Exclude names that are common single-word titles or departments
-              const commonTitles = ['ceo', 'cto', 'cfo', 'cmo', 'cio', 'hr', 'sales', 'marketing', 'support', 'admin', 'manager', 'director', 'president', 'founder', 'owner', 'partner', 'head', 'lead', 'vice', 'executive', 'staff', 'team', 'contact', 'about', 'home', 'blog', 'news', 'events', 'careers', 'jobs', 'privacy', 'terms', 'legal', 'investors', 'media', 'press', 'solutions', 'products', 'services', 'company', 'group', 'inc', 'ltd', 'corp', 'llc'];
-              if (words.length === 1 && commonTitles.includes(lowerName)) {
-                  return false;
-              }
-
-              // 4. Ensure names have at least two distinct parts (first and last name) unless it's a known single name
-              // This helps filter out single words that might be company names or generic terms
-              if (words.length < 2 && name.length > 3 && !['mary', 'john', 'peter', 'susan', 'david', 'lisa', 'mark', 'anna', 'paul', 'maria'].includes(lowerName)) { // Add more common single names if needed
-                  // If it's a single word, it should be a proper noun (starts with capital, rest lowercase)
-                  if (words.length === 1 && !/^[A-Z][a-z]+$/.test(name)) {
-                      return false;
-                  }
-              }
-
-              // 5. Check for names that are too long (unlikely to be a single person's name)
-              if (name.length > 50) {
-                  return false;
-              }
-
-              // 6. Exclude names that are just a sequence of capital letters (e.g., "ABC Company")
-              if (name === name.toUpperCase() && name.length > 1 && words.length === 1) {
+              // New check: Filter out names with too many words (e.g., more than 6)
+              if (words.length > 9) {
                   return false;
               }
 
@@ -1419,7 +1432,10 @@ function isValidName(name, title, irrelevantPhrases) {
 
                   // Validate and add
                   if (isValidNameInBrowser(name, title, irrelevantPhrases)) {
-                    results.push({ name, title, email });
+                    const nameParts = name.split(' ').filter(Boolean);
+                    const firstName = nameParts[0] || '';
+                    const lastName = nameParts.slice(1).join(' ') || '';
+                    results.push({ name, first_name: firstName, last_name: lastName, title, email });
                   }
                 }
               }
@@ -1438,7 +1454,10 @@ function isValidName(name, title, irrelevantPhrases) {
                 const name = match[1] || match[2];
                 const email = match[2] || match[1];
                 if (name && email && isValidNameInBrowser(name, '', irrelevantPhrases)) {
-                  results.push({ name, title: '', email });
+                  const nameParts = name.split(' ').filter(Boolean);
+                  const firstName = nameParts[0] || '';
+                  const lastName = nameParts.slice(1).join(' ') || '';
+                  results.push({ name, first_name: firstName, last_name: lastName, title: '', email });
                 }
               }
             });
@@ -1518,8 +1537,8 @@ function isValidName(name, title, irrelevantPhrases) {
 
     // Select the person with the least position as the sender
     sender = {
-      first_name: scrapedPeople[0].name.split(' ')[0] || 'Team',
-      last_name: scrapedPeople[0].name.split(' ').slice(1).join(' ') || 'Member',
+      first_name: scrapedPeople[0].first_name || 'Team',
+      last_name: scrapedPeople[0].last_name || 'Member',
       email: scrapedPeople[0].email,
       title: scrapedPeople[0].title
     };
