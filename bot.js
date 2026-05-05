@@ -114,7 +114,7 @@ function selectBestSenderName(lead) {
 // ---------- CONFIG ----------
 const CONFIG = {
   genericNames: [
-    'info', 'sales', 'support', 'admin', 'administrator', 'noreply', 'no-reply',
+    'info', 'sales', 'support', 'admin', 'administrator', 'noreply', 'no-reply', 'Email Member',
     'contact', 'webmaster', 'help', 'enquiries', 'enquiry', 'marketing', 'pr',
     'press', 'billing', 'accounts', 'finance', 'hr', 'jobs', 'careers', 'team',
     'hello', 'office', 'customerservice', 'feedback', 'abuse', 'security',
@@ -388,7 +388,7 @@ irrelevantPhrases: [
 'apply now','contact now','buy now','order now','get started','start now','request quote','get quote',
 'subscribe now','download now','watch video','play video',
 'follow us','share this','like us','join community','invite friends','leave a comment','post comment',
-'all rights reserved','terms and conditions','privacy notice','cookie policy','legal notice','site map'
+'all rights reserved','terms and conditions','privacy notice','cookie policy','legal notice','site map','Email Member',
 ],
   irrelevantKeywords: [
     'glassdoor', 'linkedin', 'facebook', 'twitter', 'instagram', 'youtube', 'wikipedia',
