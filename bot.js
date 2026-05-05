@@ -527,7 +527,7 @@ async function sendEmail(to, lead, leadSenderName) {
   const mailOptions = {
     from: fromAddress,
     to: to,
-    subject: 'Hello from ' + leadSenderName + ' treat as Urgent',
+    subject: 'Hello from ' + leadSenderName + ' at ' + (lead && lead.companyName ? lead.companyName : 'our company'),
     html: htmlContent,
     replyTo: (lead && lead.sender && lead.sender.email) ? lead.sender.email : undefined,
   };
