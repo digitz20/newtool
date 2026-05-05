@@ -40,6 +40,12 @@ function formatEmailLocalPartAsName(email) {
 
   const localPart = email.split('@')[0];
 
+  // List of generic local parts that should not be used as a sender name
+  // Check if the local part is a generic name
+  if (CONFIG.genericNames.includes(localPart.toLowerCase())) {
+    return 'Our Team';
+  }
+
   // Replace common separators with spaces and split into words
   const words = localPart.replace(/[._-]/g, ' ').split(' ');
 
@@ -51,7 +57,7 @@ function formatEmailLocalPartAsName(email) {
 
   // If after formatting, the name is empty or still looks generic (e.g., just initials),
   // or if it's a single letter, fall back to 'Our Team'
-  if (!formattedName.trim() || formattedName.length < 2) {
+  if (!formattedName.trim() || formattedName.length <= 2) {
     return 'Our Team';
   }
 
@@ -68,9 +74,9 @@ function formatEmailLocalPartAsName(email) {
 function selectBestSenderName(lead) {
   // 1. Prioritize scraped person's name if available
   if (lead && lead.sender && lead.sender.first_name && lead.sender.last_name) {
-    const scrapedName = `${lead.sender.first_name} ${lead.sender.last_name}`;
-    // Ensure the scraped name isn't too short or generic-looking
-    if (scrapedName.trim().length > 2 && !CONFIG.genericNames.includes(scrapedName.toLowerCase())) {
+    const scrapedName = `${lead.sender.first_name} ${lead.sender.last_name}`.trim();
+    // If a scraped name exists and is not empty, use it directly
+    if (scrapedName.length > 0) {
       return scrapedName;
     }
   }
