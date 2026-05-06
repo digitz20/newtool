@@ -112,14 +112,19 @@ function selectBestSenderName(lead) {
 }
 
 // Function to get multiple random country codes from the CONFIG.countryCodes object
-function getMultipleRandomCountryCodes(count = 1) {
+function getMultipleRandomCountryCodes(count) {
   const countryCodes = Object.keys(CONFIG.countryCodes);
   if (countryCodes.length === 0) {
     return []; // No country codes available
   }
 
+  // If count is not specified or is greater than or equal to the total, return all
+  if (!count || count >= countryCodes.length) {
+    return countryCodes;
+  }
+
   const shuffled = countryCodes.sort(() => 0.5 - Math.random());
-  return shuffled.slice(0, Math.min(count, countryCodes.length));
+  return shuffled.slice(0, count);
 }
 
 // ---------- CONFIG ----------
@@ -1968,7 +1973,7 @@ async function main(io) {
         console.log(`\nSearching websites for industry: ${industry}`);
 
         // Randomize defaultCountryCode for each industry
-        CONFIG.countryCodesForSearch = getMultipleRandomCountryCodes(10);
+        CONFIG.countryCodesForSearch = getMultipleRandomCountryCodes();
         const allWebsitesForIndustry = [];
 
         for (const countryCode of CONFIG.countryCodesForSearch) {
