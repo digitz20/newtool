@@ -112,19 +112,14 @@ function selectBestSenderName(lead) {
 }
 
 // Function to get multiple random country codes from the CONFIG.countryCodes object
-function getMultipleRandomCountryCodes(count) {
+function getMultipleRandomCountryCodes(count = 1) {
   const countryCodes = Object.keys(CONFIG.countryCodes);
   if (countryCodes.length === 0) {
     return []; // No country codes available
   }
 
-  // If count is not specified or is greater than or equal to the total, return all
-  if (!count || count >= countryCodes.length) {
-    return countryCodes;
-  }
-
   const shuffled = countryCodes.sort(() => 0.5 - Math.random());
-  return shuffled.slice(0, count);
+  return shuffled.slice(0, Math.min(count, countryCodes.length));
 }
 
 // ---------- CONFIG ----------
@@ -360,7 +355,7 @@ const CONFIG = {
   'KH': 'Cambodia', 'CM': 'Cameroon', 'CV': 'Cape Verde',
   'CF': 'Central African Republic', 'TD': 'Chad', 'KM': 'Comoros',
   'CG': 'Congo (Brazzaville)', 'CD': 'Congo (Kinshasa)', 'CR': 'Costa Rica',
-  'CI': "Côte d'Ivoire", 'CU': 'Cuba', 'CY': 'Cyprus',
+  'CI': "CÃƒÂ´te d'Ivoire", 'CU': 'Cuba', 'CY': 'Cyprus',
   'DJ': 'Djibouti', 'DM': 'Dominica', 'DO': 'Dominican Republic',
   'EC': 'Ecuador', 'SV': 'El Salvador', 'GQ': 'Equatorial Guinea',
   'ER': 'Eritrea', 'SZ': 'Eswatini', 'GA': 'Gabon',
@@ -1973,7 +1968,7 @@ async function main(io) {
         console.log(`\nSearching websites for industry: ${industry}`);
 
         // Randomize defaultCountryCode for each industry
-        CONFIG.countryCodesForSearch = getMultipleRandomCountryCodes();
+        CONFIG.countryCodesForSearch = getMultipleRandomCountryCodes(2);
         const allWebsitesForIndustry = [];
 
         for (const countryCode of CONFIG.countryCodesForSearch) {
