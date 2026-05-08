@@ -9,6 +9,13 @@ const fs = require('fs');
 const path = require('path');
 const nodemailer = require('nodemailer');
 
+// Global state for staggered search
+let currentIndustryIndex = 0;
+let currentCountryCodeIndex = 0;
+const COUNTRY_CODE_BATCH_SIZE = 3;
+const DELAY_BETWEEN_BATCHES_MS = 60 * 1000; // 1 minute delay between batches
+
+
 
 
 
@@ -119,7 +126,7 @@ function getMultipleRandomCountryCodes(count = 1) {
   }
 
   const shuffled = countryCodes.sort(() => 0.5 - Math.random());
-  return shuffled.slice(0, Math.min(count, countryCodes.length));
+ return shuffled.slice(0, Math.min(count, countryCodes.length));
 }
 
 // ---------- CONFIG ----------
@@ -1963,6 +1970,8 @@ async function main(io) {
     emailQueueProcessorInterval = setInterval(emailQueueProcessor, 2 * 60 * 1000); // Run every 2 minutes
   }
 
+  const shuffledIndustries = shuffleArray([...CONFIG.industries]);
+
   let browser = await puppeteer.launch({
     headless: "new",
     ignoreHTTPSErrors: true, // Add this line
@@ -1989,69 +1998,122 @@ async function main(io) {
   while (true) {
     try {
       const leads = loadLeads();
-      console.log(`Loaded ${leads.length} existing leads.`); // Added log
-      const shuffledIndustries = shuffleArray([...CONFIG.industries]);
+      console.log(`Loaded ${leads.length} existing leads.`);
 
-      for (const industry of shuffledIndustries) {
-        console.log(`\nSearching websites for industry: ${industry}`);
+      const industries = shuffledIndustries;
+      const countryCodesForSearch = CONFIG.manualCountryCodesForSearch;
 
-        // Randomize defaultCountryCode for each industry
-        CONFIG.countryCodesForSearch = CONFIG.manualCountryCodesForSearch;
-        const allWebsitesForIndustry = [];
+      // Ensure indices are within bounds
+      if (currentIndustryIndex >= industries.length) {
+        currentIndustryIndex = 0; // Reset industries
+      }
 
-        for (const countryCode of CONFIG.countryCodesForSearch) {
-          console.log(`[INFO] Searching for industry: ${industry} in country: ${countryCode || 'Global'}`);
+      const industry = industries[currentIndustryIndex];
+      console.log(`\nSearching websites for industry: ${industry}`);
 
-          let dialingCodeToUse = CONFIG.defaultDialingCode;
-          if (!dialingCodeToUse && countryCode && CONFIG.countryDialingCodeMapping[countryCode]) {
-            dialingCodeToUse = CONFIG.countryDialingCodeMapping[countryCode];
-          }
-          const websites = await getWebsitesByIndustry(industry, browser, countryCode, dialingCodeToUse);
-          console.log(`Found ${websites.length} websites for industry ${industry} in country ${countryCode}.`);
-          allWebsitesForIndustry.push(...websites);
+      const processedCountryCodes = [];
+      const allWebsitesForCurrentBatch = [];
+      for (let i = 0; i < COUNTRY_CODE_BATCH_SIZE; i++) {
+        if (currentCountryCodeIndex >= countryCodesForSearch.length) {
+          currentCountryCodeIndex = 0; // Reset country codes for the next industry cycle
+          break; // Exit batching if all country codes are processed for this industry cycle
+        }
+        processedCountryCodes.push(countryCodesForSearch[currentCountryCodeIndex]);
+        currentCountryCodeIndex++;
+      }
+
+      if (processedCountryCodes.length === 0) {
+        // If no country codes were processed in this batch, move to the next industry
+        currentIndustryIndex++;
+        console.log(`No country codes processed in this batch for industry ${industry}. Moving to next industry.`);
+        await wait(DELAY_BETWEEN_BATCHES_MS); // Wait before moving to the next industry
+        continue;
+      }
+
+      for (const countryCode of processedCountryCodes) {
+        console.log(`[INFO] Searching for industry: ${industry} in country: ${countryCode || 'Global'}`);
+
+        let dialingCodeToUse = CONFIG.defaultDialingCode;
+        if (!dialingCodeToUse && countryCode && CONFIG.countryDialingCodeMapping[countryCode]) {
+          dialingCodeToUse = CONFIG.countryDialingCodeMapping[countryCode];
+        }
+        const websites = await getWebsitesByIndustry(industry, browser, countryCode, dialingCodeToUse);
+        console.log(`Found ${websites.length} websites for industry ${industry} in country ${countryCode}.`);
+        allWebsitesForCurrentBatch.push(...websites);
+      }
+
+      // Remove duplicates from allWebsitesForCurrentBatch
+      const uniqueWebsitesForCurrentBatch = [...new Set(allWebsitesForCurrentBatch)];
+      console.log(`Total unique websites found for industry ${industry} in this batch: ${uniqueWebsitesForCurrentBatch.length}`);
+
+      for (const website of uniqueWebsitesForCurrentBatch) {
+        if (leads.some(l => l.website === website)) {
+          console.log(`Skipping already processed website: ${website}`);
+          continue;
         }
 
-        // Remove duplicates from allWebsitesForIndustry
-        const uniqueWebsitesForIndustry = [...new Set(allWebsitesForIndustry)];
-        console.log(`Total unique websites found for industry ${industry}: ${uniqueWebsitesForIndustry.length}`);
+        const { emails, phoneNumbers, domain, companyName, scrapedPeople, sender } = await extractEmailsFromWebsite(website, browser);
+        // A lead is valid if we found any emails (scraped or Apollo) or Apollo contacts
+        if (emails.length > 0 || phoneNumbers.length > 0 || scrapedPeople.length > 0) {
+          const lead = {
+            website,
+            domain, // Store the extracted domain
+            companyName, // Store the extracted company name
+            emails, // Emails found via scraping and Apollo (excluding sender)
+            phoneNumbers, // Phone numbers found via scraping
+            scrapedPeople, // All relevant Apollo contacts
+            sender, // The selected sender contact from Apollo
+            industry,
+            timestamp: new Date().toISOString(),
+            emailsSent: false,
+            sentEmailLinks: [],
+          };
+          leads.push(lead);
+          saveLeads(leads);
+          console.log(`Saved new lead for ${website}. Total leads: ${leads.length}`); // Added log
+          io.emit('new-lead', lead);
+        } else {
+          console.log(`No emails found for ${website}.`); // Added log
+        }
+      }
 
-        for (const website of uniqueWebsitesForIndustry) {
-          if (leads.some(l => l.website === website)) {
-            console.log(`Skipping already processed website: ${website}`);
-            continue;
-          }
+      // After processing a batch of country codes for the current industry, wait
+      console.log(`Finished batch for industry: ${industry}. Waiting for ${DELAY_BETWEEN_BATCHES_MS / 1000} seconds before next batch/industry.`);
+      await wait(DELAY_BETWEEN_BATCHES_MS);
 
-          const { emails, phoneNumbers, domain, companyName, scrapedPeople, sender } = await extractEmailsFromWebsite(website, browser);
-          // A lead is valid if we found any emails (scraped or Apollo) or Apollo contacts
-          if (emails.length > 0 || phoneNumbers.length > 0 || scrapedPeople.length > 0) {
-            const lead = {
-              website,
-              domain, // Store the extracted domain
-              companyName, // Store the extracted company name
-              emails, // Emails found via scraping and Apollo (excluding sender)
-              phoneNumbers, // Phone numbers found via scraping
-              scrapedPeople, // All relevant Apollo contacts
-              sender, // The selected sender contact from Apollo
-              industry,
-              timestamp: new Date().toISOString(),
-              emailsSent: false,
-              sentEmailLinks: [],
-            };
-            leads.push(lead);
-            saveLeads(leads);
-            console.log(`Saved new lead for ${website}. Total leads: ${leads.length}`); // Added log
-            io.emit('new-lead', lead);
-          } else {
-            console.log(`No emails found for ${website}.`); // Added log
-        } // Closing brace for 'for (const website of websites)' loop
-      } // <--- ADDED: Closing brace for 'for (const industry of shuffledIndustries)' loop
+      // If all country codes for the current industry have been processed, move to the next industry
+      if (currentCountryCodeIndex >= countryCodesForSearch.length) {
+        console.log(`[INFO] Industry ${industry} completed. Relaunching browser for next industry.`);
+        if (browser) {
+          await browser.close();
+        }
+        browser = await puppeteer.launch({
+          headless: "new",
+          ignoreHTTPSErrors: true,
+          args: [
+            '--no-sandbox',
+            '--disable-setuid-sandbox',
+            '--disable-dev-shm-usage',
+            '--disable-accelerated-2d-canvas',
+            '--disable-gpu',
+            '--ignore-certificate-errors',
+            '--ignore-ssl-errors',
+            '--ignore-certificate-errors-spki-list',
+            '--ignore-ssl-errors-ignore-untrusted',
+            '--disable-blink-features=AutomationControlled'
+          ],
+          protocolTimeout: 90000,
+        });
+        currentIndustryIndex++;
+        currentCountryCodeIndex = 0; // Reset country code index for the new industry
+      }
+
 
       console.log('\nFinished scraping all industries. Restarting in a bit...');
       if (io) { // Only emit if io is defined
         io.emit('bot-status', { message: 'Finished scraping all industries. Restarting in a bit...' });
       }
       await wait(10000);
-     } // Wait for 10 seconds before the next big loop
     } catch (error) {
       console.error('A critical error occurred in the main loop:', error);
       if (io) { // Only emit if io is defined
