@@ -124,6 +124,7 @@ function getMultipleRandomCountryCodes(count = 1) {
 
 // ---------- CONFIG ----------
 const CONFIG = {
+  manualCountryCodesForSearch: ['CN', 'GB', 'DE', 'FR', 'JP', 'US', 'CA', 'AE', 'ID', 'TH', 'KR', 'AU'], // Manually set country codes for search
   genericNames: [
     'info', 'sales', 'support', 'admin', 'administrator', 'noreply', 'no-reply', 'Email Member',
     'contact', 'webmaster', 'help', 'enquiries', 'enquiry', 'marketing', 'pr',
@@ -292,7 +293,22 @@ const CONFIG = {
     'Entertainment', 'Environmental Services', 'Fashion', 'Food & Beverage',
     'Government', 'Healthcare', 'Hospitality', 'Insurance', 'Legal Services',
     'Manufacturing', 'Media', 'Non-profit', 'Pharmaceuticals', 'Real Estate',
-    'Retail', 'Technology', 'Telecommunications', 'Transportation', 'Utilities'
+    'Retail', 'Technology', 'Telecommunications', 'Transportation', 'Utilities',
+    'Cybersecurity', 'Fintech', 'Biotechnology', 'Renewable Energy', 'Logistics',
+    'E-commerce', 'Digital Marketing', 'Artificial Intelligence', 'Virtual Reality', 'Augmented Reality',
+    'Aerospace & Defense', 'Automotive', 'Construction & Engineering', 'Education Management',
+    'Environmental Services', 'Government Administration', 'Human Resources', 'Investment Banking',
+    'Legal Services', 'Marketing & Advertising', 'Media & Entertainment', 'Non-profit Organization Management',
+    'Oil & Gas', 'Pharmaceuticals', 'Real Estate', 'Sports & Recreation', 'Telecommunications',
+    'Transportation & Logistics', 'Utilities', 'Wholesale Trade',
+    'Agriculture & Farming', 'Arts & Culture', 'Banking & Finance', 'Biotechnology & Life Sciences',
+    'Chemical Manufacturing', 'Civil Engineering', 'Consulting Services', 'Consumer Goods',
+    'Data Analytics', 'E-learning', 'Fashion & Apparel', 'Food & Beverage Production',
+    'Healthcare Services', 'Hospitality & Tourism', 'Information Technology', 'Insurance Services',
+    'Manufacturing & Production', 'Mining & Metals', 'Non-profit & Philanthropy',
+    'Public Relations', 'Publishing & Editing', 'Research & Development', 'Retail Trade',
+    'Software Development', 'Supply Chain Management', 'Transportation Services',
+    'Waste Management', 'Water Treatment'
   ],
   
   googleResultsPerSearch: 60,
@@ -355,7 +371,7 @@ const CONFIG = {
   'KH': 'Cambodia', 'CM': 'Cameroon', 'CV': 'Cape Verde',
   'CF': 'Central African Republic', 'TD': 'Chad', 'KM': 'Comoros',
   'CG': 'Congo (Brazzaville)', 'CD': 'Congo (Kinshasa)', 'CR': 'Costa Rica',
-  'CI': "CÃƒÂ´te d'Ivoire", 'CU': 'Cuba', 'CY': 'Cyprus',
+  'CI': "Cote d'Ivoire", 'CU': 'Cuba', 'CY': 'Cyprus',
   'DJ': 'Djibouti', 'DM': 'Dominica', 'DO': 'Dominican Republic',
   'EC': 'Ecuador', 'SV': 'El Salvador', 'GQ': 'Equatorial Guinea',
   'ER': 'Eritrea', 'SZ': 'Eswatini', 'GA': 'Gabon',
@@ -387,11 +403,11 @@ const CONFIG = {
   'ZM': 'Zambia', 'ZW': 'Zimbabwe'
   },
   countryTldMapping: {
-    'US': ['.com', '.org', '.net', '.us'],
+    'US': ['.com', '.org', '.net', '.us', '.info', '.biz', '.name'],
     'CA': ['.ca', '.com', '.org', '.net'],
-    'GB': ['.co.uk', '.org.uk', '.uk', '.com'],
+    'GB': ['.co.uk', '.org.uk', '.uk', '.com', '.info', '.biz', '.name'],
     'AU': ['.com.au', '.net.au', '.org.au', '.au'],
-    'DE': ['.de', '.com', '.org', '.net'],
+    'DE': ['.de', '.com', '.org', '.net', '.info', '.biz', '.name'],
     'FR': ['.fr', '.com', '.org', '.net'],
     'JP': ['.jp', '.co.jp', '.or.jp', '.ne.jp', '.com'],
     'IN': ['.in', '.co.in', '.org.in', '.net.in', '.com'],
@@ -732,7 +748,7 @@ irrelevantPhrases: [
 'apply now','contact now','buy now','order now','get started','start now','request quote','get quote',
 'subscribe now','download now','watch video','play video',
 'follow us','share this','like us','join community','invite friends','leave a comment','post comment',
-'all rights reserved','terms and conditions','privacy notice','cookie policy','legal notice','site map','Email Member',
+'all rights reserved','terms and conditions','privacy notice','cookie policy','legal notice','site map','Email Member','@1x.png'
 ],
   irrelevantKeywords: [
     'glassdoor', 'linkedin', 'facebook', 'twitter', 'instagram', 'youtube', 'wikipedia',
@@ -1337,12 +1353,24 @@ async function getWebsitesByIndustry(industry, browser, countryCode = null, dial
       const cleanedLinks = links.map(link => {
         try {
           const url = new URL(link);
+          // Ensure it's a valid web URL with a hostname
+          if (!['http:', 'https:'].includes(url.protocol) || !url.hostname) {
+            return null;
+          }
+
           // The HTML version also uses a redirect with 'uddg' parameter
           if (url.hostname.includes('duckduckgo.com') && url.searchParams.has('uddg')) {
             const uddgUrl = url.searchParams.get('uddg');
-            // Validate the extracted uddgUrl before returning
-            new URL(uddgUrl); // Throws if invalid
-            return uddgUrl;
+            try {
+              const parsedUddgUrl = new URL(uddgUrl);
+              // Validate the extracted uddgUrl before returning
+              if (!['http:', 'https:'].includes(parsedUddgUrl.protocol) || !parsedUddgUrl.hostname) {
+                return null;
+              }
+              return uddgUrl;
+            } catch (e) {
+              return null; // uddgUrl is malformed
+            }
           }
           return link;
         } catch (e) {
@@ -1968,7 +1996,7 @@ async function main(io) {
         console.log(`\nSearching websites for industry: ${industry}`);
 
         // Randomize defaultCountryCode for each industry
-        CONFIG.countryCodesForSearch = getMultipleRandomCountryCodes(2);
+        CONFIG.countryCodesForSearch = CONFIG.manualCountryCodesForSearch;
         const allWebsitesForIndustry = [];
 
         for (const countryCode of CONFIG.countryCodesForSearch) {
