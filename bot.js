@@ -1662,7 +1662,7 @@ function isValidName(name, title, irrelevantPhrases) {
 
             // Define isValidNameInBrowser locally for the browser context
             const isValidNameInBrowser = (name, title, irrelevantPhrases) => {
-              if (!name || typeof name !== 'string' || name.trim().length < 2) {
+              if (!name || typeof name !== 'string' || name.trim().length < 3) { // Increased minimum length to 3
                 return false;
               }
 
@@ -1671,7 +1671,45 @@ function isValidName(name, title, irrelevantPhrases) {
               const words = name.split(/\s+/).filter(Boolean);
 
               // Consolidate all irrelevant terms
-              const commonTitles = ['ceo', 'cto', 'cfo', 'cmo', 'cio', 'hr', 'sales', 'marketing', 'support', 'admin', 'manager', 'director', 'president', 'founder', 'owner', 'partner', 'head', 'lead', 'vice', 'executive', 'staff', 'team', 'contact', 'about', 'home', 'blog', 'news', 'events', 'careers', 'jobs', 'privacy', 'terms', 'legal', 'investors', 'media', 'press', 'solutions', 'products', 'services', 'company', 'group', 'inc', 'ltd', 'corp', 'llc', 'gmbh', 'ag', 'sa', 'bv', 'pte', 'sarl', 'dr', 'mr', 'ms', 'jr', 'sr', 'prof', 'eng', 'phd', 'm.d.', 'm.d', 'esq', 'cpa', 'cfa', 'p.e.', 'p.e'];
+              const commonTitles = [
+                'ceo', 'cto', 'cfo', 'cmo', 'cio', 'hr', 'sales', 'marketing', 'support', 'admin', 'manager', 'director',
+                'president', 'founder', 'owner', 'partner', 'head', 'lead', 'vice', 'executive', 'staff', 'team',
+                'contact', 'about', 'home', 'blog', 'news', 'events', 'careers', 'jobs', 'privacy', 'terms', 'legal',
+                'investors', 'media', 'press', 'solutions', 'products', 'services', 'company', 'group', 'inc', 'ltd',
+                'corp', 'llc', 'gmbh', 'ag', 'sa', 'bv', 'pte', 'sarl', 'dr', 'mr', 'ms', 'jr', 'sr', 'prof', 'eng',
+                'phd', 'm.d.', 'm.d', 'esq', 'cpa', 'cfa', 'p.e.', 'p.e',
+                // Expanded generic terms
+                'info', 'hello', 'admin', 'support', 'sales', 'marketing', 'enquiries', 'inquiries', 'billing', 'careers',
+                'jobs', 'press', 'media', 'legal', 'privacy', 'terms', 'abuse', 'webmaster', 'noreply', 'postmaster',
+                'security', 'feedback', 'help', 'office', 'reception', 'frontdesk', 'customerservice', 'customercare',
+                'accounts', 'finance', 'purchasing', 'hr', 'humanresources', 'it', 'tech', 'development', 'design',
+                'operations', 'pr', 'publicrelations', 'investorrelations', 'partnerships', 'affiliates', 'events',
+                'newsletter', 'subscribe', 'unsubscribe', 'notifications', 'updates', 'system', 'daemon', 'hostmaster',
+                'root', 'guest', 'test', 'demo', 'trial', 'info@', 'hello@', 'admin@', 'support@', 'sales@', 'marketing@',
+                'contact@', 'enquiries@', 'inquiries@', 'billing@', 'careers@', 'jobs@', 'press@', 'media@', 'legal@',
+                'privacy@', 'terms@', 'abuse@', 'webmaster@', 'noreply@', 'postmaster@', 'security@', 'feedback@', 'help@',
+                'office@', 'reception@', 'frontdesk@', 'customerservice@', 'customercare@', 'accounts@', 'finance@',
+                'purchasing@', 'hr@', 'humanresources@', 'it@', 'tech@', 'development@', 'design@', 'operations@', 'pr@',
+                'publicrelations@', 'investorrelations@', 'partnerships@', 'affiliates@', 'events@', 'newsletter@',
+                'subscribe@', 'unsubscribe@', 'notifications@', 'updates@', 'system@', 'daemon@', 'hostmaster@', 'root@',
+                'guest@', 'test@', 'demo@', 'trial@', 'mail', 'email', 'website', 'domain', 'server', 'client', 'user',
+                'account', 'team', 'group', 'department', 'division', 'section', 'unit', 'branch', 'office', 'headquarters',
+                'corporate', 'global', 'international', 'national', 'regional', 'local', 'general', 'main', 'primary',
+                'secondary', 'tertiary', 'first', 'second', 'third', 'fourth', 'fifth', 'sixth', 'seventh', 'eighth',
+                'ninth', 'tenth', 'eleventh', 'twelfth', 'thirteenth', 'fourteenth', 'fifteenth', 'sixteenth', 'seventeenth',
+                'eighteenth', 'nineteenth', 'twentieth', 'twentyfirst', 'twentysecond', 'twentythird', 'twentyfourth',
+                'twentyfifth', 'twentysixth', 'twentyseventh', 'twentyeighth', 'twentyninth', 'thirtieth', 'thirtyfirst',
+                'thirtysecond', 'thirtythird', 'thirtyfourth', 'thirtyfifth', 'thirtysixth', 'thirtyseventh', 'thirtyeighth',
+                'thirtyninth', 'fortieth', 'fortyfirst', 'fortysecond', 'fortythird', 'fortyfourth', 'fortyfifth',
+                'fortysixth', 'fortyseventh', 'fortyeighth', 'fortyninth', 'fiftieth', 'fiftyfirst', 'fiftysecond',
+                'fiftythird', 'fiftyfourth', 'fiftyfifth', 'fiftysixth', 'fiftyseventh', 'fiftyeighth', 'fiftyninth',
+                'sixtieth', 'sixtyfirst', 'sixtysecond', 'sixtythird', 'sixtyfourth', 'sixtyfifth', 'sixtysixth',
+                'sixtyseventh', 'sixtyeighth', 'sixtyninth', 'seventieth', 'seventyfirst', 'seventysecond', 'seventythird',
+                'seventyfourth', 'seventyfifth', 'seventysixth', 'seventyseventh', 'seventyeighth', 'seventyninth',
+                'eightieth', 'eightyfirst', 'eightysecond', 'eightythird', 'eightyfourth', 'eightyfifth', 'eightysixth',
+                'eightyseventh', 'eightyeighth', 'eightyninth', 'ninetieth', 'ninetyfirst', 'ninetysecond', 'ninetythird',
+                'ninetyfourth', 'ninetyfifth', 'ninetysixth', 'ninetyseventh', 'ninetyeighth', 'ninetyninth', 'hundredth'
+              ];
               const allIrrelevantTerms = new Set([...irrelevantPhrases.map(p => p.toLowerCase()), ...commonTitles]);
 
               // Check against all irrelevant terms
@@ -1713,7 +1751,7 @@ function isValidName(name, title, irrelevantPhrases) {
               }
 
               // Check for names that are too long (unlikely to be a single person's name)
-              if (name.length > 50) {
+              if (name.length > 30) { // Reduced max length to 30
                   return false;
               }
 
@@ -1733,7 +1771,7 @@ function isValidName(name, title, irrelevantPhrases) {
               }
 
               // New check: Filter out names with too many words (e.g., more than 6)
-              if (words.length > 9) {
+              if (words.length > 6) { // Reduced max words to 6
                   return false;
               }
 
