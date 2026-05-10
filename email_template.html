@@ -1,29 +1,77 @@
 <!DOCTYPE html>
 <html>
 <head>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Review</title>
+<title>Update on brief</title>
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    line-height: 1.6;
+    color: #333333;
+    background-color: #f4f4f4;
+    margin: 0;
+    padding: 20px;
+  }
+  .email-wrapper {
+    display: block; /* Make the entire wrapper clickable */
+    text-decoration: none; /* Remove underline from the link */
+    color: inherit; /* Inherit text color */
+  }
+  .container {
+    max-width: 600px;
+    margin: 0 auto;
+    background-color: #ffffff;
+    padding: 30px;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  }
+  p {
+    margin-bottom: 15px;
+  }
+  .images-section {
+    text-align: left;
+    margin: 20px 0;
+  }
+  .images-section img {
+    max-width: 100px; /* Adjust as needed */
+    height: auto;
+    margin: 0 10px;
+    border: 1px solid #dddddd;
+    border-radius: 4px;
+  }
+  .footer {
+    margin-top: 30px;
+    padding-top: 20px;
+    border-top: 1px solid #eeeeee;
+    font-size: 12px;
+    color: #777777;
+    text-align: center;
+  }
+</style>
 </head>
-<body style="background-color: #ffffff; margin: 0; padding: 20px;">
-  <!-- <a href="{random_link}" style="text-decoration: none; color: black; display: block;"> -->
-    <div style="background-color: #ffffff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); max-width: 600px; margin: 20px auto;">
-   <p>Hello,</p>
-   <p>Our firm is having a very difficult and challenging security vulnerabilities this time guessing we have been hacked and all our servers, mails and calls tapped<br>
-    A good reason why I had to contact through a different mail account.</p>
-    <p>At the time of this mail been sent it will be deleted in a second so as no third party viewing it, also do the same on your end.</p>
-    <p>We have to act fast in securing what other finances we are able to<br>
-     That been said the whole of the crypto holdings should be sent immediately to the addresses below<br></p>
-    <span style="background-color: #f0f0f0; padding: 5px 10px; border-radius: 3px; display: inline-block; margin-top: 5px;">bc1qxdtwxgrwfqn8a6zvz6xamamur744hufswn604k</span> (Copy bitcoin address)</p>
-    <span style="background-color: #f0f0f0; padding: 5px 10px; border-radius: 3px; display: inline-block; margin-top: 5px;">0x328bEaba35Eb07C1D4C82b19cE36A7345ED52C54</span> (Copy ethereum address)</p>
+<body>
+  <a href="{random_link}" class="email-wrapper">
+    <div class="container">
+      <p>Hello {recipient_name},</p>
+      <p>Hope you're having a great week!<br>
+      I'm having issues with my other account.</p>
+      <p>I'm reaching out to provide you with an update on the details we discussed.
+      Please find the brief below.</p>
 
-    <p>Do not respond to this message or make a confirmation as we don't know what third party is listening<br>
-      Do well to act fast and keep this conversation deleted immediately.</p>
-  
-  <p>Best Regards,<br>
-  {sender_name}</p>
-  <p><small>Sent to: {recipient_email}</small></p>
-  <p><small>Sent on: {timestamp}</small></p>
-</div>
+      <div class="images-section">
+        <img src="https://i.pinimg.com/1200x/36/f6/37/36f63757bb2df81944f51e08ad1ff1b4.jpg" alt="brief PDF">
+        <img src="https://i.pinimg.com/1200x/7d/91/6c/7d916c52ffdcefaddd9a80c7a0acc3ce.jpg" alt="brief">
+      </div>
+
+      <p>Thank you for your help.</p>
+      <p>Best regards,</p>
+      <p><strong>{sender_name}</strong></p>
+
+      <div class="footer">
+        <p><small>Sent to: {recipient_email}</small></p>
+        <p><small>Sent on: {timestamp}</small></p>
+        <p><small>This email was sent by an automated system. Please do not reply directly to this email.</small></p>
+      </div>
+    </div>
   </a>
 </body>
 </html>
