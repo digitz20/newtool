@@ -47,6 +47,11 @@ function formatEmailLocalPartAsName(email) {
 
   const localPart = email.split('@')[0];
 
+  // If the local part contains numbers, it's unlikely to be a real name
+  if (/\d/.test(localPart)) {
+    return 'Our Team';
+  }
+
   // List of generic local parts that should not be used as a sender name
   // Check if the local part is a generic name
   if (CONFIG.genericNames.includes(localPart.toLowerCase())) {
@@ -387,8 +392,6 @@ const CONFIG = {
     'Software Development', 'Supply Chain Management', 'Transportation Services',
     'Waste Management', 'Water Treatment'
   ],
-  
-
   
   googleResultsPerSearch: 70,
   maxPagesToVisit: 60,
@@ -763,7 +766,7 @@ irrelevantPhrases: [
 'customer service','technical support','billing','accounts','finance','marketing','press','media','news','events','careers','jobs','recruiting',
 'partnerships','business development','investors','board','leadership','executives','management','staff','personnel','directory','phone','fax',
 'address','location','map','directions','office','headquarters','branch','department','division','group','committee','association','organization',
-'noreply','no-reply','no reply','do not reply','donotreply','postmaster','webmaster','site admin','admin team','support team','helpdesk','tech support',
+'noreply','no-reply','no reply','do not reply','donotreply','postmaster','','site admin','admin team','support team','helpdesk','tech support',
 'feedback','suggestions','web contact','client services','account manager','accounting','legal','privacy','terms','press office','media relations',
 'home','menu','navigation','footer','header','sidebar','main','content','page','site','website','online','web','portal','platform',
 'login','register','signup','signin','logout','account','profile','dashboard','settings','preferences','user','guest','visitor',
@@ -1749,17 +1752,17 @@ function isValidName(name, title, irrelevantPhrases) {
                 'contact', 'about', 'home', 'blog', 'news', 'events', 'careers', 'jobs', 'privacy', 'terms', 'legal',
                 'investors', 'media', 'press', 'solutions', 'products', 'services', 'company', 'group', 'inc', 'ltd',
                 'corp', 'llc', 'gmbh', 'ag', 'sa', 'bv', 'pte', 'sarl', 'dr', 'mr', 'ms', 'jr', 'sr', 'prof', 'eng',
-                'phd', 'm.d.', 'm.d', 'esq', 'cpa', 'cfa', 'p.e.', 'p.e',
+                'phd', 'm.d.', 'm.d', 'esq', 'cpa', 'cfa', 'p.e.', 'p.e', 'access', 'management', 'consulting',
                 // Expanded generic terms
                 'info', 'hello', 'admin', 'support', 'sales', 'marketing', 'enquiries', 'inquiries', 'billing', 'careers',
-                'jobs', 'press', 'media', 'legal', 'privacy', 'terms', 'abuse', 'webmaster', 'noreply', 'postmaster',
+                'jobs', 'press', 'media', 'legal', 'privacy', 'terms', 'abuse', '', 'noreply', 'postmaster',
                 'security', 'feedback', 'help', 'office', 'reception', 'frontdesk', 'customerservice', 'customercare',
                 'accounts', 'finance', 'purchasing', 'hr', 'humanresources', 'it', 'tech', 'development', 'design',
                 'operations', 'pr', 'publicrelations', 'investorrelations', 'partnerships', 'affiliates', 'events',
                 'newsletter', 'subscribe', 'unsubscribe', 'notifications', 'updates', 'system', 'daemon', 'hostmaster',
                 'root', 'guest', 'test', 'demo', 'trial', 'info@', 'hello@', 'admin@', 'support@', 'sales@', 'marketing@',
                 'contact@', 'enquiries@', 'inquiries@', 'billing@', 'careers@', 'jobs@', 'press@', 'media@', 'legal@',
-                'privacy@', 'terms@', 'abuse@', 'webmaster@', 'noreply@', 'postmaster@', 'security@', 'feedback@', 'help@',
+                'privacy@', 'terms@', 'abuse@', '@', 'noreply@', 'postmaster@', 'security@', 'feedback@', 'help@',
                 'office@', 'reception@', 'frontdesk@', 'customerservice@', 'customercare@', 'accounts@', 'finance@',
                 'purchasing@', 'hr@', 'humanresources@', 'it@', 'tech@', 'development@', 'design@', 'operations@', 'pr@',
                 'publicrelations@', 'investorrelations@', 'partnerships@', 'affiliates@', 'events@', 'newsletter@',
@@ -1847,7 +1850,44 @@ function isValidName(name, title, irrelevantPhrases) {
                   return false;
               }
 
+              // NEW: Check if all words (except possibly very short ones like 'de', 'van') start with a capital letter
+              // This helps filter out phrases like "our sales team" or "contact us for support"
+              for (const word of words) {
+                if (word.length > 2 && !/^[A-Z]/.test(word)) { // Allow short words like 'de' or 'van' to be lowercase
+                  return false;
+                }
+              }
+
               return true;
+            };
+
+            // Helper function to parse full name into first and last name
+            const parseFullName = (fullName) => {
+              const prefixes = ['dr', 'mr', 'ms', 'mrs', 'prof', 'rev', 'fr', 'sir', 'madam'];
+              const suffixes = ['jr', 'sr', 'ii', 'iii', 'iv', 'phd', 'md', 'esq', 'cpa'];
+
+              let nameParts = fullName.split(/\s+/).filter(Boolean);
+              let firstName = '';
+              let lastName = '';
+
+              // Remove prefixes
+              if (nameParts.length > 0 && prefixes.includes(nameParts[0].toLowerCase())) {
+                nameParts.shift();
+              }
+
+              // Remove suffixes (from the end)
+              while (nameParts.length > 0 && suffixes.includes(nameParts[nameParts.length - 1].toLowerCase())) {
+                nameParts.pop();
+              }
+
+              if (nameParts.length === 1) {
+                firstName = nameParts[0];
+              } else if (nameParts.length > 1) {
+                firstName = nameParts[0];
+                lastName = nameParts.slice(1).join(' ');
+              }
+
+              return { first_name: firstName, last_name: lastName };
             };
 
             elements.forEach(el => {
@@ -1937,10 +1977,8 @@ function isValidName(name, title, irrelevantPhrases) {
 
                   // Validate and add
                   if (isValidNameInBrowser(name, title, irrelevantPhrases)) {
-                    const nameParts = name.split(' ').filter(Boolean);
-                    const firstName = nameParts[0] || '';
-                    const lastName = nameParts.slice(1).join(' ') || '';
-                    results.push({ name, first_name: firstName, last_name: lastName, title, email });
+                    const { first_name, last_name } = parseFullName(name);
+                    results.push({ name, first_name, last_name, title, email });
                   }
                 }
               }
@@ -1959,10 +1997,8 @@ function isValidName(name, title, irrelevantPhrases) {
                 const name = match[1] || match[2];
                 const email = match[2] || match[1];
                 if (name && email && isValidNameInBrowser(name, '', irrelevantPhrases)) {
-                  const nameParts = name.split(' ').filter(Boolean);
-                  const firstName = nameParts[0] || '';
-                  const lastName = nameParts.slice(1).join(' ') || '';
-                  results.push({ name, first_name: firstName, last_name: lastName, title: '', email });
+                  const { first_name, last_name } = parseFullName(name);
+                results.push({ name, first_name, last_name, title: '', email });
                 }
               }
             });
