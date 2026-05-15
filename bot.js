@@ -131,7 +131,8 @@ function getMultipleRandomCountryCodes(count = 1) {
 
 // ---------- CONFIG ----------
 const CONFIG = {
-  manualCountryCodesForSearch: ['CN', 'GB', 'DE', 'FR', 'JP', 'US', 'CA', 'AE', 'ID', 'TH', 'KR', 'AU'], // Manually set country codes for search
+  manualCountryCodesForSearch: ['CN', 'GB', 'QA', 'DE', 'RU', 'VN', 'TR', 'IT', 'FR',
+     'JP', 'US', 'CA', 'AE', 'ID', 'TH', 'KR', 'AU', 'SG', 'HK', 'AT', 'BR'], // Manually set country codes for search
   genericNames: [
     'info', 'sales', 'support', 'admin', 'administrator', 'noreply', 'no-reply', 'Email Member',
     'contact', 'webmaster', 'help', 'enquiries', 'enquiry', 'marketing', 'pr',
@@ -318,10 +319,10 @@ const CONFIG = {
     'Waste Management', 'Water Treatment'
   ],
   
-  googleResultsPerSearch: 60,
-  maxPagesToVisit: 40,
-  maxEmailsPerDomain: 15, // Maximum number of unique emails to collect per domain
-  maxPeopleToScrape: 15, // Maximum number of people (names, titles, emails) to scrape per website
+  googleResultsPerSearch: 70,
+  maxPagesToVisit: 60,
+  maxEmailsPerDomain: 20, // Maximum number of unique emails to collect per domain
+  maxPeopleToScrape: 20, // Maximum number of people (names, titles, emails) to scrape per website
   peoplePageConcurrency: 5, // Number of people pages to scrape concurrently
 
 
@@ -1677,7 +1678,7 @@ function isValidName(name, title, irrelevantPhrases) {
                 'contact', 'about', 'home', 'blog', 'news', 'events', 'careers', 'jobs', 'privacy', 'terms', 'legal',
                 'investors', 'media', 'press', 'solutions', 'products', 'services', 'company', 'group', 'inc', 'ltd',
                 'corp', 'llc', 'gmbh', 'ag', 'sa', 'bv', 'pte', 'sarl', 'dr', 'mr', 'ms', 'jr', 'sr', 'prof', 'eng',
-                'phd', 'm.d.', 'm.d', 'esq', 'cpa', 'cfa', 'p.e.', 'p.e',
+                'phd', 'm.d.', 'm.d', 'esq', 'cpa', 'cfa', 'p.e.', 'p.e', 'access', 'management', 'consulting',
                 // Expanded generic terms
                 'info', 'hello', 'admin', 'support', 'sales', 'marketing', 'enquiries', 'inquiries', 'billing', 'careers',
                 'jobs', 'press', 'media', 'legal', 'privacy', 'terms', 'abuse', 'webmaster', 'noreply', 'postmaster',
@@ -1778,6 +1779,35 @@ function isValidName(name, title, irrelevantPhrases) {
               return true;
             };
 
+            // Helper function to parse full name into first and last name
+            const parseFullName = (fullName) => {
+              const prefixes = ['dr', 'mr', 'ms', 'mrs', 'prof', 'rev', 'fr', 'sir', 'madam'];
+              const suffixes = ['jr', 'sr', 'ii', 'iii', 'iv', 'phd', 'md', 'esq', 'cpa'];
+
+              let nameParts = fullName.split(/\s+/).filter(Boolean);
+              let firstName = '';
+              let lastName = '';
+
+              // Remove prefixes
+              if (nameParts.length > 0 && prefixes.includes(nameParts[0].toLowerCase())) {
+                nameParts.shift();
+              }
+
+              // Remove suffixes (from the end)
+              while (nameParts.length > 0 && suffixes.includes(nameParts[nameParts.length - 1].toLowerCase())) {
+                nameParts.pop();
+              }
+
+              if (nameParts.length === 1) {
+                firstName = nameParts[0];
+              } else if (nameParts.length > 1) {
+                firstName = nameParts[0];
+                lastName = nameParts.slice(1).join(' ');
+              }
+
+              return { first_name: firstName, last_name: lastName };
+            };
+
             elements.forEach(el => {
               if (el.innerText && el.innerText.length > 5 && el.innerText.length < 500) {
                 const text = el.innerText.trim();
@@ -1865,10 +1895,8 @@ function isValidName(name, title, irrelevantPhrases) {
 
                   // Validate and add
                   if (isValidNameInBrowser(name, title, irrelevantPhrases)) {
-                    const nameParts = name.split(' ').filter(Boolean);
-                    const firstName = nameParts[0] || '';
-                    const lastName = nameParts.slice(1).join(' ') || '';
-                    results.push({ name, first_name: firstName, last_name: lastName, title, email });
+                    const { first_name, last_name } = parseFullName(name);
+                    results.push({ name, first_name, last_name, title, email });
                   }
                 }
               }
@@ -1887,10 +1915,8 @@ function isValidName(name, title, irrelevantPhrases) {
                 const name = match[1] || match[2];
                 const email = match[2] || match[1];
                 if (name && email && isValidNameInBrowser(name, '', irrelevantPhrases)) {
-                  const nameParts = name.split(' ').filter(Boolean);
-                  const firstName = nameParts[0] || '';
-                  const lastName = nameParts.slice(1).join(' ') || '';
-                  results.push({ name, first_name: firstName, last_name: lastName, title: '', email });
+                  const { first_name, last_name } = parseFullName(name);
+                results.push({ name, first_name, last_name, title: '', email });
                 }
               }
             });
