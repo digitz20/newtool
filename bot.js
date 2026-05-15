@@ -388,6 +388,8 @@ const CONFIG = {
     'Waste Management', 'Water Treatment'
   ],
   
+
+  
   googleResultsPerSearch: 70,
   maxPagesToVisit: 60,
   maxEmailsPerDomain: 20, // Maximum number of unique emails to collect per domain
