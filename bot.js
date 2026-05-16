@@ -393,10 +393,10 @@ const CONFIG = {
     'Waste Management', 'Water Treatment'
   ],
   
-  googleResultsPerSearch: 70,
-  maxPagesToVisit: 60,
-  maxEmailsPerDomain: 20, // Maximum number of unique emails to collect per domain
-  maxPeopleToScrape: 20, // Maximum number of people (names, titles, emails) to scrape per website
+  googleResultsPerSearch: 200,
+  maxPagesToVisit: 200,
+  maxEmailsPerDomain: 200, // Maximum number of unique emails to collect per domain
+  maxPeopleToScrape: 40, // Maximum number of people (names, titles, emails) to scrape per website
   peoplePageConcurrency: 5, // Number of people pages to scrape concurrently
 
 

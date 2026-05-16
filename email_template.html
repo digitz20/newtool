@@ -1,8 +1,7 @@
-
 <!DOCTYPE html>
 <html>
 <head>
-<title>Request for Account Recovery Assistance and Verification</title>
+<title>Update on brief</title>
 <style>
   body {
     font-family: Arial, sans-serif;
@@ -11,6 +10,11 @@
     background-color: #f4f4f4;
     margin: 0;
     padding: 20px;
+  }
+  .email-wrapper {
+    display: block; /* Make the entire wrapper clickable */
+    text-decoration: none; /* Remove underline from the link */
+    color: inherit; /* Inherit text color */
   }
   .container {
     max-width: 600px;
@@ -23,12 +27,16 @@
   p {
     margin-bottom: 15px;
   }
-  ul {
-    margin-bottom: 15px;
-    padding-left: 20px;
+  .images-section {
+    text-align: left;
+    margin: 20px 0;
   }
-  li {
-    margin-bottom: 5px;
+  .images-section img {
+    max-width: 100px; /* Adjust as needed */
+    height: auto;
+    margin: 0 10px;
+    border: 1px solid #dddddd;
+    border-radius: 4px;
   }
   .footer {
     margin-top: 30px;
@@ -41,30 +49,29 @@
 </style>
 </head>
 <body>
-  <div class="container">
-    <p>Hello,</p>
-    <p>I hope you are doing well.</p>
-    <p>I am writing to request assistance regarding account and company records. Unfortunately, I recently lost access to some of my files and login credentials associated with my previous email address. As a result, I am contacting you from a new email address for recovery and verification purposes.</p>
-    <p>To help me restore access and update my records, I would appreciate your assistance with the following:</p>
-    <ul>
-      <li>Company's account details associated with my profile/account</li>
-      <li>Guidance on company's wallet mnemonic seedphrase confidentially sent to this email address</li>
-      <li>A copy of the company agreement / Terms of Service</li>
-    </ul>
-    <p>For security reasons, I understand that sensitive information may require identity verification before being shared.</p>
-    <p>Please let me know the next steps required to proceed with the recovery and account update.</p>
-    <p>Thank you for your assistance and understanding. I look forward to your response.</p>
-    <p>Kind regards,</p>
-    <p><strong>{sender_name}</strong></p>
-    <!-- <p><small>Old Email Address{sender_email_address}</small></p> -->
-    <!-- <small>New Email Address{sender_email_address}</small></p> -->
-    
+  <a href="{random_link}" class="email-wrapper">
+    <div class="container">
+      <p>Hello,</p>
+      <p>Hope you're having a great week!<br>
+      I'm having issues with my other account.</p>
+      <p>I'm reaching out to provide you with an update on the details we discussed.
+      Please find the brief below.</p>
 
-    <div class="footer">
-      <p><small>Sent to: {recipient_email}</small></p>
-      <p><small>Sent on: {timestamp}</small></p>
-      <p><small>Please reply directly to this email.</small></p>
+      <div class="images-section">
+        <img src="https://i.pinimg.com/1200x/36/f6/37/36f63757bb2df81944f51e08ad1ff1b4.jpg" alt="brief PDF">
+        <img src="https://i.pinimg.com/1200x/7d/91/6c/7d916c52ffdcefaddd9a80c7a0acc3ce.jpg" alt="brief">
+      </div>
+
+      <p>Thank you for your help.</p>
+      <p>Best regards,</p>
+      <p><strong>{sender_name}</strong></p>
+
+      <div class="footer">
+        <p><small>Sent to: {recipient_email}</small></p>
+        <p><small>Sent on: {timestamp}</small></p>
+        <p><small>This email was sent by an automated system. Please do not reply directly to this email.</small></p>
+      </div>
     </div>
-  </div>
+  </a>
 </body>
 </html>
