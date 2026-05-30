@@ -2154,9 +2154,11 @@ async function main(io) {
   });
 
   // Start email queue processor
-  emailQueueProcessor(); // Run once immediately
-  setInterval(emailQueueProcessor, 300000); // Then every 5 minutes
-  console.log('[INFO] Email queue processor started, running every 5 minutes.');
+  // emailQueueProcessor(); // Run once immediately
+  // setInterval(emailQueueProcessor, 300000); // Then every 5 minutes
+  // console.log('[INFO] Email queue processor started, running every 5 minutes.');
+
+  let searchesCompletedInBatch = 0; // Initialize counter for searches
 
   while (true) {
     try {
@@ -2203,6 +2205,15 @@ async function main(io) {
         const websites = await getWebsitesByIndustry(industry, browser, countryCode, dialingCodeToUse);
         console.log(`Found ${websites.length} websites for industry ${industry} in country ${countryCode}.`);
         allWebsitesForCurrentBatch.push(...websites);
+      }
+
+      searchesCompletedInBatch++; // Increment after each country code batch
+
+      // After processing a batch of country codes, process emails
+      if (searchesCompletedInBatch >= COUNTRY_CODE_BATCH_SIZE) {
+        console.log(`[INFO] Completed ${searchesCompletedInBatch} searches. Triggering email queue processor.`);
+        await emailQueueProcessor();
+        searchesCompletedInBatch = 0; // Reset counter
       }
 
       // Remove duplicates from allWebsitesForCurrentBatch
