@@ -140,20 +140,63 @@ manualCountryCodesForSearch: [
   'CN', 'GB', 'QA', 'DE', 'RU', 'VN', 'TR', 'IT', 'FR',
   'JP', 'US', 'CA', 'AE', 'ID', 'TH', 'KR', 'AU', 'SG',
   'HK', 'AT', 'BR',
+
   'ES', 'PT', 'NL', 'BE', 'CH', 'SE', 'NO', 'DK', 'FI',
   'PL', 'CZ', 'HU', 'RO', 'GR', 'IE', 'UA', 'SK', 'SI',
   'HR', 'RS', 'BG', 'LT', 'LV', 'EE', 'LU', 'IS', 'MT',
   'CY', 'AL', 'BA', 'MD',
+
   'SA', 'EG', 'ZA', 'NG', 'KE', 'MA', 'DZ', 'IL', 'TN',
   'GH', 'ET', 'UG', 'TZ', 'CM', 'SN', 'CI', 'ZW', 'ZM',
   'BW', 'NA', 'OM', 'KW', 'BH', 'JO', 'LB', 'IQ',
+
   'IN', 'PK', 'BD', 'MY', 'PH', 'TW', 'LK', 'NP',
   'KZ', 'UZ', 'MM', 'KH', 'LA', 'MN', 'AF',
   'AZ', 'GE', 'AM', 'KG', 'TJ',
+
   'MX', 'AR', 'CL', 'CO', 'PE', 'VE', 'UY', 'PY',
   'BO', 'EC', 'GT', 'CR', 'PA', 'DO', 'CU', 'JM',
   'HN', 'NI', 'SV', 'BS', 'TT',
-  'NZ', 'FJ', 'PG', 'WS', 'VU', 'TO', 'SB', 'FM', 'MH', 'NR', 'KI', 'TV', 'PW'
+
+  'NZ', 'FJ', 'PG', 'WS', 'VU', 'TO', 'SB', 'FM',
+  'MH', 'NR', 'KI', 'TV', 'PW',
+
+  'AD', 'LI', 'MC', 'SM', 'VA', 'ME', 'MK', 'BY',
+
+  'YE', 'SY', 'IR', 'PS',
+
+  'CD', 'CG', 'AO', 'MZ', 'MW', 'RW', 'BI', 'GA',
+  'GQ', 'TD', 'NE', 'ML', 'BF', 'MR', 'GM', 'GN',
+  'GW', 'SL', 'LR', 'TG', 'BJ', 'ER', 'DJ', 'SO',
+  'SS', 'MG', 'MU', 'SC', 'KM', 'CV', 'ST', 'LS',
+
+  'BT', 'BN', 'TL', 'MV',
+
+  'GY', 'SR', 'BZ',
+
+  'AG', 'BB', 'DM', 'GD', 'KN', 'LC', 'VC',
+
+  'CK', 'NU',
+
+  'GL', 'FO',
+
+  'PR', 'VI', 'GU', 'MP', 'AS',
+
+  'AW', 'CW', 'SX', 'BQ',
+
+  'GI', 'JE', 'GG', 'IM',
+
+  'PF', 'NC', 'RE', 'YT',
+
+  'MO',
+
+  'AI', 'BM', 'KY', 'MS', 'TC', 'VG',
+
+  'FK', 'GF', 'GP', 'MQ', 'BL', 'MF', 'PM',
+
+  'IO', 'CX', 'CC', 'NF', 'PN', 'TK', 'WF',
+
+  'EH', 'SJ', 'GS', 'HM', 'TF', 'AQ', 'UM'
 ],
   genericNames: [
     'info', 'sales', 'support', 'admin', 'administrator', 'noreply', 'no-reply', 'Email Member',
