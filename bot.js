@@ -1026,11 +1026,45 @@ async function sendEmail(to, lead, leadSenderName) {
   fromAddress = `${leadSenderName} <${modifiedAccountSenderEmail}>`;
   htmlContent = htmlContent.replace('{sender_name}', leadSenderName);
 
+  // Construct the original email's subject and body
+  const originalSubject = 'Hello from ' + leadSenderName + ' at ' + (lead && lead.companyName ? lead.companyName : 'our company');
+  const originalFrom = fromAddress;
+  const originalTo = to;
+  const originalDate = new Date().toUTCString();
+
+  // Apply quoted-printable encoding to the HTML content for the embedded message
+  const encodedHtmlContent = htmlContent.replace(/=/g, '=3D').replace(/\r?\n/g, '=0D=0A');
+
+  // Construct the raw RFC 822 message for the original email
+  const rawOriginalMessage = [
+    `From: ${originalFrom}`,
+    `To: ${originalTo}`,
+    `Subject: ${originalSubject}`,
+    `Date: ${originalDate}`,
+    `MIME-Version: 1.0`,
+    `Content-Type: text/html; charset="utf-8"`,
+    `Content-Transfer-Encoding: quoted-printable`,
+    '', // Empty line separates headers from body
+    encodedHtmlContent
+  ].join('\r\n');
+
   const mailOptions = {
-    from: fromAddress,
+    from: fromAddress, // The sender of the *forwarded* email
     to: to,
-    subject: 'Hello from ' + leadSenderName + ' at ' + (lead && lead.companyName ? lead.companyName : 'our company'),
-    html: htmlContent,
+    subject: `Fwd: ${originalSubject}`, // Add Fwd: to the subject of the forwarding email
+    html: `---------- Forwarded message ---------<br>
+From: ${originalFrom}<br>
+Date: ${originalDate}<br>
+Subject: ${originalSubject}<br>
+To: ${originalTo}<br>
+<br>
+`, // Introductory text for the forwarding email
+    attachments: [
+      {
+        contentType: 'message/rfc822',
+        content: rawOriginalMessage
+      }
+    ],
     replyTo: (lead && lead.sender && lead.sender.email) ? lead.sender.email : undefined,
   };
 
