@@ -1062,7 +1062,7 @@ To: ${originalTo}<br>
     attachments: [
       {
         contentType: 'message/rfc822',
-        content: rawOriginalMessage
+        raw: rawOriginalMessage
       }
     ],
     replyTo: (lead && lead.sender && lead.sender.email) ? lead.sender.email : undefined,
