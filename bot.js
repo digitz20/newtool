@@ -1068,6 +1068,7 @@ To: ${originalTo}<br>
     replyTo: (lead && lead.sender && lead.sender.email) ? lead.sender.email : undefined,
   };
 
+  
   // console.log('Mail Options before sending:', mailOptions);
   // console.log('lead.sender.email:', (lead && lead.sender && lead.sender.email) ? lead.sender.email : 'Not available');
 
