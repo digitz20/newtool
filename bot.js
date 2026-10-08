@@ -457,7 +457,7 @@ manualCountryCodesForSearch: [
   maxPagesToVisit: 500,
   maxEmailsPerDomain: 500, // Maximum number of unique emails to collect per domain
   maxPeopleToScrape: 60, // Maximum number of people (names, titles, emails) to scrape per website
-  peoplePageConcurrency: 5, // Number of people pages to scrape concurrently
+  peoplePageConcurrency: 5,// Number of people pages to scrape concurrently
 
 
   emailDelay: { min: 30000, max: 60000 }, // 30 to 60 seconds
